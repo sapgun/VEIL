@@ -1,0 +1,31 @@
+/* Brand is analog. Product is digital. Neutral backgrounds are RGB-equal by design.
+   Isolated tokens prevent old global app colors leaking into the new landing. */
+.vl-site {
+  --vl-bg: #111111;
+  --vl-surface: #191919;
+  --vl-surface-raised: #222222;
+  --vl-text: #e8e2d8;
+  --vl-muted: #b3afa7;
+  --vl-dim: #96928c;
+  --vl-paper: #cec3b0;
+  --vl-paper-hover: #e0d5c2;
+  --vl-ink: #191817;
+  --vl-line: #363636;
+  --vl-line-strong: #57534e;
+  --vl-success: #8fa998;
+  --vl-danger: #c29a8f;
+  --vl-serif: Georgia, 'Times New Roman', serif;
+  --vl-sans: 'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  --vl-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --vl-max: 1280px;
+  --vl-gutter: clamp(24px, 5vw, 80px);
+  --vl-radius: 5px;
+  --vl-duration: 180ms;
+  --vl-ease: cubic-bezier(.22,1,.36,1);
+  color: var(--vl-text);
+  background: var(--vl-bg);
+  font-family: var(--vl-sans);
+  font-weight: 400;
+  line-height: 1.5;
+  color-scheme: dark;
+}

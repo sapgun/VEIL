@@ -1,0 +1,238 @@
+{
+  "version": "1.0.0",
+  "rasterPolicy": "No upscale. Native 512x512 portrait displayed at a maximum of 256 CSS px at DPR2.",
+  "sourcePortrait": {
+    "name": "image(20260927-144250).png",
+    "width": 512,
+    "height": 512,
+    "provenance": "User-provided VEIL concept, reused, not newly generated"
+  },
+  "fontFilesIncluded": false,
+  "assets": [
+    {
+      "path": "archival-paper.svg",
+      "bytes": 1598,
+      "sha256": "6a14907f55bc63ffe8e0faeee7d9e88a2a8f223640b47fd524a222cdfbb3c711"
+    },
+    {
+      "path": "archive-grid.svg",
+      "bytes": 334,
+      "sha256": "5456b1730f0ef959443f8db1da1f222a950d322e85931263f1dd7a5949bb8a18"
+    },
+    {
+      "path": "context-map.svg",
+      "bytes": 813,
+      "sha256": "99b790c828b42294378243cc946396bb8722366d6070d99a8231f6cc0a7d8ff9"
+    },
+    {
+      "path": "divider.svg",
+      "bytes": 201,
+      "sha256": "809c2343cc4f2ec1ffcadb48bd389780b5ae6bd71db91970af409185a47b3fea"
+    },
+    {
+      "path": "envelope.svg",
+      "bytes": 1952,
+      "sha256": "27df75dda13a382916352fa18159e90c0fa5c910bfe63da16098543b44e7181d"
+    },
+    {
+      "path": "favicon-32.png",
+      "bytes": 995,
+      "sha256": "6693befa701cfbfc051459d790f73e1bf571d12668413f6e18949914acba39be"
+    },
+    {
+      "path": "favicon.svg",
+      "bytes": 262,
+      "sha256": "6e77dbadd820be6363dd1acec8f2c8f8d81a1e8f8480dfd9df44cc7582713b58"
+    },
+    {
+      "path": "icons/arrow-down.svg",
+      "bytes": 234,
+      "sha256": "febae90e628fa058e4ca97e6310e184355bd7e60897cb884025aad26e9d07b5d"
+    },
+    {
+      "path": "icons/arrow-right.svg",
+      "bytes": 234,
+      "sha256": "06110884a1e8f0675a4837cc368e7f9f0ae1c4e56cd85baab90b1b697e349e30"
+    },
+    {
+      "path": "icons/arrow-up-right.svg",
+      "bytes": 229,
+      "sha256": "ff619aed380233ed84019e5ad94b8e40f855560b4abbabd8837d1ab9a02d5726"
+    },
+    {
+      "path": "icons/briefcase.svg",
+      "bytes": 292,
+      "sha256": "f25ba90651bcc14196c3932f7b51f3712ef717f5637b7b4202ab3e3c4bc29efc"
+    },
+    {
+      "path": "icons/check.svg",
+      "bytes": 225,
+      "sha256": "bf6ab552af31445565883bee0bf17f097a27f47d5d004ba444c381d6d9a87738"
+    },
+    {
+      "path": "icons/chevron.svg",
+      "bytes": 224,
+      "sha256": "a55bd22b63691acc618cb169e35b59d6ebe9682be33f9bafabb835fece7ae4b8"
+    },
+    {
+      "path": "icons/clock.svg",
+      "bytes": 254,
+      "sha256": "45a97345d0912a1dec35912167d17148f1c8c8463b238b2fa9fc730de8de7ce6"
+    },
+    {
+      "path": "icons/close.svg",
+      "bytes": 229,
+      "sha256": "a4d25423a18727499aa67b09086e4cad6b6876b4745ac6e04d89b4c7ec6e8eab"
+    },
+    {
+      "path": "icons/code.svg",
+      "bytes": 251,
+      "sha256": "3fe365a2dc8af3adec41ad6b30131c677c1b73259069eb74aadd47b9d6092d2c"
+    },
+    {
+      "path": "icons/copy.svg",
+      "bytes": 272,
+      "sha256": "3f1e90018beb483f9de3edff7b572551220d82bfef0c427e78f53acc6e2f783a"
+    },
+    {
+      "path": "icons/cube.svg",
+      "bytes": 273,
+      "sha256": "a6267e64e15c7c9fefc0b655fdf25c86c3f61ddb498bd803477209dc48b7ac81"
+    },
+    {
+      "path": "icons/eye-off.svg",
+      "bytes": 500,
+      "sha256": "b56f1076dbb3f9f7fba5dc016b5d8f917e52b2926487702c09e1ded2dc566850"
+    },
+    {
+      "path": "icons/fingerprint.svg",
+      "bytes": 321,
+      "sha256": "2924bf09cb3907a71829bc1c4529bdde3f03b5a3f9646c68db424059dc614626"
+    },
+    {
+      "path": "icons/info.svg",
+      "bytes": 258,
+      "sha256": "c1d0f73f6188a4a88204dd16c9fbf93bc08b1706b8fd3492ffbddc815733f236"
+    },
+    {
+      "path": "icons/link.svg",
+      "bytes": 291,
+      "sha256": "35563e5c0b98a32e34e62252dc4e7bcc5a49988a842d4e6d3530efb67493fdfb"
+    },
+    {
+      "path": "icons/lock.svg",
+      "bytes": 293,
+      "sha256": "1306a4585640c34fbf5e50ef879d9d82f6b6d2554071b4213be30eefbe222e3e"
+    },
+    {
+      "path": "icons/person.svg",
+      "bytes": 276,
+      "sha256": "06f33560eec297cc98c9ffff877faacb7d62487aa36bdb37021b1014effda061"
+    },
+    {
+      "path": "icons/plus.svg",
+      "bytes": 225,
+      "sha256": "396ccd8614be494e175aaf8c1babdcaa35c866a2c396013c55ec2cc9417a1aba"
+    },
+    {
+      "path": "icons/receipt.svg",
+      "bytes": 265,
+      "sha256": "5b65217ffcbc1d94b57c2c08012107e59ff3eaa40b99b275d3eba5d6dc171df5"
+    },
+    {
+      "path": "icons/revoke.svg",
+      "bytes": 250,
+      "sha256": "9aec97209a510e45ce6c2edfb220764754f45ad3f1c9176a4e90bdf29802fa2b"
+    },
+    {
+      "path": "icons/root.svg",
+      "bytes": 322,
+      "sha256": "f12e9b3af33e1bc7cbfd06f58c16a585088ae6520688b73205e25c3ef74fc212"
+    },
+    {
+      "path": "icons/shield-check.svg",
+      "bytes": 419,
+      "sha256": "43bac7fdb2d1a5768eed405c49b27658710664d24820cea8eaa23264659f4475"
+    },
+    {
+      "path": "icons/shield.svg",
+      "bytes": 261,
+      "sha256": "2945c1d6ce67b4c0a29b2aae8b67575b7b681dc32e83818f2303c043aa00a994"
+    },
+    {
+      "path": "icons/users.svg",
+      "bytes": 316,
+      "sha256": "3ca887c54e9b811f19e11bacf0b9a7035323c0cb455f0f0182633ac768d41e0e"
+    },
+    {
+      "path": "icons.svg",
+      "bytes": 5589,
+      "sha256": "04b56ed65cf268ab9e01f03be5b04f3f775e3a93aed5c687af6eeea03886cd0f"
+    },
+    {
+      "path": "monogram.svg",
+      "bytes": 216,
+      "sha256": "6d0229dccfcf5d98ad1680d79e35ad3335bba9f4a37bd9efd51b692ce695dee4"
+    },
+    {
+      "path": "paper-grain.png",
+      "bytes": 38161,
+      "sha256": "4a1b529feffb34c0c8b4dd3743b12538bdb5df2f1e3aa479500ef9cb3e49b6c8"
+    },
+    {
+      "path": "portrait-256.webp",
+      "bytes": 6276,
+      "sha256": "34c00ecbc07329872175d74e4f58d93dae2f93828fb3ec72e04982424b429db8"
+    },
+    {
+      "path": "portrait-512.webp",
+      "bytes": 18894,
+      "sha256": "be8c8bce21ffc6d49621a454c4023961c27275f0dabb98ca7111a30600e23c65"
+    },
+    {
+      "path": "redaction.svg",
+      "bytes": 234,
+      "sha256": "839d97ce27820e422ca128608ee18d1020ac82a384a9ff1b8f13942a15bf6413"
+    },
+    {
+      "path": "registration.svg",
+      "bytes": 239,
+      "sha256": "1aa80a3e09f99224c2136d131eb83dce334063e9c4f22e82a03c78f4d1474fc1"
+    },
+    {
+      "path": "social-card.png",
+      "bytes": 54535,
+      "sha256": "e720f41667550e7151820ed28f5c1824afc6d8bc4cb4ec7352a2eba510c6f1d4"
+    },
+    {
+      "path": "social-card.svg",
+      "bytes": 7140,
+      "sha256": "0831ae6a953a6288c0bdf80233910c4de83596fa9a00d0cb7a26a16f8f407dc6"
+    },
+    {
+      "path": "touch-icon.png",
+      "bytes": 4882,
+      "sha256": "c64591a6d87f465cadd562594fb9452a82112651e7cd3bb3002339400647434d"
+    },
+    {
+      "path": "vellum.svg",
+      "bytes": 537,
+      "sha256": "3f9b4cdeaa8638a37eea45700585924d7706200ec9f042a0e70029c2f3a83465"
+    },
+    {
+      "path": "wax-seal.svg",
+      "bytes": 6445,
+      "sha256": "c152164d1cc0ca9f1c5eaebd792bc643f35c9a69ac1459d783e6f6e1ac0f852b"
+    },
+    {
+      "path": "wordmark-dark.svg",
+      "bytes": 489,
+      "sha256": "69337aaee6ec017678ffd3535b3bd8625fc814508719378e25e4b4245ade65a5"
+    },
+    {
+      "path": "wordmark.svg",
+      "bytes": 489,
+      "sha256": "0e1064f348f3ca0d0b8b119e11dbee8cf4f6400c45f53eb276a9e1ca2274cfa3"
+    }
+  ]
+}
