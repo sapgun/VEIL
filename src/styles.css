@@ -847,3 +847,6 @@ footer > span:last-child {
     padding: 12px 8px;
   }
 }
+
+.receipt .execution { color: #edf1e7; }
+.receipt .execution strong, .receipt .execution p, .receipt .execution code { color: inherit; }

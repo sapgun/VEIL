@@ -31,11 +31,13 @@ jobs:
           /tmp/compact/compactc contracts/veil.compact contracts/managed/veil
       - name: Verify real Midnight proofs
         run: |
+          trap 'docker compose logs proof-server' EXIT
           docker compose up -d proof-server
           for i in $(seq 1 90); do
             if curl -s -o /dev/null http://127.0.0.1:6300/; then break; fi
             sleep 2
           done
+          curl -s -o /dev/null http://127.0.0.1:6300/
           npm run test:zk
       - name: Check landing and app deep links
         run: |
@@ -53,4 +55,5 @@ jobs:
           name: veil-desktop-build
           path: dist
           retention-days: 7
+
 

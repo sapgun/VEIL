@@ -3,4 +3,4 @@ services:
     image: midnightntwrk/proof-server:8.0.3
     ports:
       - "127.0.0.1:6300:6300"
-    command: ["--port", "6300", "--num-workers", "2"]
+
