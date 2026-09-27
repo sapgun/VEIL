@@ -1,10 +1,52 @@
-# VEIL
+<p align="center">
+  <img src="docs/assets/veil-teaser-silhouette.png" width="320" alt="VEIL — Coming Soon">
+</p>
 
-**Unlink by Default. Link by Consent.**
+<h1 align="center">VEIL</h1>
 
-A web-based Midnight Korea Hackathon MVP: one hidden root, three economic personas (**DAILY / API / DEFI**), private authorization, consented same-root proofs and revocation.
+<p align="center"><strong>Unlink by Default. Link by Consent.</strong></p>
+
+<p align="center">A private economic identity layer for the agentic economy — built on Midnight.</p>
+
+---
+
+VEIL lets a verified human operate multiple context-specific economic personas that can prove legitimate authority across digital and physical commerce — without exposing the user's root identity or making every activity linkable by default.
+
+**One verified human. Many economic personas. Linked only when you choose.**
+
+- **Hide the Principal. Prove the Authority.**
+- **Accountability at the Root. Unlinkability at the Edge.**
+- **Minimum identity. Maximum verifiability.**
+
+**Live site (landing):** https://veil-sigma-lilac.vercel.app/ — the interactive ZK demo runs locally (see below); the static deployment serves the landing only.
+
+## Understand it in 90 seconds
+
+1. Three economic personas — **DAILY / API / DEFI** — belong to one verified principal.
+2. Outside observers cannot normally link them to each other.
+3. Each persona can independently prove valid economic authority with a real Midnight ZK proof.
+4. The owner can selectively link two personas without revealing the root identity.
+5. Revocation invalidates future authority.
+
+The future economy may be agent-to-agent and machine-to-machine. Humans should not have to turn their entire economic lives into one globally linkable identity graph to participate in it. VEIL gives the economy verifiable authority without unnecessary identity exposure.
+
+## What VEIL is not
+
+- Not a KYC/AML bypass system. VEIL does not remove compliance — it removes unnecessary disclosure.
+- Not a mixer or untraceable payment system. VEIL is not "anonymous spending"; it is accountable, context-specific economic agency.
+- Not a Visa/Mastercard replacement, and not an x401/x402 competitor. VEIL does not replace those rails — it gives them a privacy-preserving economic identity layer.
+
+## This repository: the hackathon MVP
 
 **Real Midnight ZK is implemented.** Compact circuits compile, the official Midnight proof server generates proofs, and the Midnight ledger verifies those proofs before the UI reports success. This runs against an **in-memory offline ledger**, not a public network. Credential issuance is mocked; purchases, API billing and swaps are simulated.
+
+<p align="center">
+  <img src="docs/assets/veil-app-ui-flows.png" width="720" alt="VEIL app — Vault, Share, Proof, Delegate flows">
+</p>
+
+<p align="center">
+  <img src="docs/assets/veil-app-ui-vault.png" width="720" alt="VEIL app — My Vault, credential sharing, activity">
+</p>
 
 ## Run the real ZK demo
 
@@ -29,7 +71,7 @@ npm run build         # TypeScript + production frontend
 npm start             # serve the built app and ZK Core
 ```
 
-`dist/` alone is not a complete application. `npm run preview` only serves static assets. Private and public demo state are ephemeral; reset/restart invalidates the current identity and receipts. Missing compiler output or an unavailable prover causes failure, never a signature-only fallback.
+`dist/` alone is not a complete application. `npm run preview` only serves static assets. Private and public demo state are ephemeral; reset/restart invalidates the current identity and receipts. Missing compiler output or an unavailable prover causes failure, never a signature-only fallback. See [desktop quickstart](docs/DESKTOP-QUICKSTART.md).
 
 ## Three-minute walkthrough
 
@@ -56,6 +98,40 @@ Amount, target, action, consent and receipt expiry are **Core-enforced policy**.
 
 Only fee balancing is disabled because this offline demo has no funded wallet. No `mockProve`, fabricated proof or network-finality claim is used. The browser checks the supplemental Ed25519 receipt signature and asks the local Core to verify the Midnight proof; it does not run the ledger WASM verifier itself.
 
+## Concept architecture
+
+<p align="center">
+  <img src="docs/assets/veil-core-architecture.png" width="720" alt="VEIL core architecture — analog privacy system layers">
+</p>
+
+The MVP implements the core loop: Verified Root → Context Personas → Authorization → Unlinkability → Selective Re-Link → Revocation. The full system vision extends this into delegation, coordination and trust outputs across composable rails (x401/x402, cards, DeFi, bank rails) — VEIL composes with rails rather than replacing them.
+
+## Brand
+
+<p align="center">
+  <img src="docs/assets/veil-visual-board.png" width="720" alt="VEIL visual board — analog privacy system">
+</p>
+
+<p align="center">
+  <img src="docs/assets/veil-teaser-envelope.png" width="240" alt="VEIL sealed envelope — Protect Intent">
+  <img src="docs/assets/veil-teaser-dossier.png" width="240" alt="VEIL dossier teaser">
+  <img src="docs/assets/veil-teaser-intent-protected.png" width="240" alt="VEIL — Intent Protected">
+</p>
+
+<p align="center">
+  <img src="docs/assets/veil-design-system.png" width="720" alt="VEIL design system — palette, typography, components">
+</p>
+
+A veil does not erase the person behind it. It controls what becomes visible, to whom, and when. All brand assets live in [`docs/assets/`](docs/assets/).
+
+## Roadmap
+
+- **Phase 0 — Hackathon (this repo):** Midnight proof core, three personas, three contexts, selective link proof, revocation.
+- **Phase 1 — Developer prototype:** `veil-sdk`, x401/x402 adapters, wallet abstraction, remote encrypted Desktop Core.
+- **Phase 2 — Mobile product:** native client, TEE proving, offline pre-authorized capabilities, NFC/QR commerce flows.
+- **Phase 3 — Financial integrations:** regulated credential issuers, payment token providers, DeFi/RWA adapters.
+- **Phase 4 — Agent/machine economy:** agent-to-agent personas, vehicle/robot identities, credential federation.
+
 ## Privacy and remaining work
 
 The trusted Desktop Core knows all persona relationships. The demo has one enrolled root, so its anonymity set is one; it demonstrates the circuit mechanism, **not production anonymity**. Timing and other metadata can still correlate actions. A selected-link disclosure cannot be undone after someone observes it.
@@ -71,6 +147,6 @@ The owner API and verifier screens share one local origin. Do not expose them pu
 - `server/http.mjs`: loopback API and frontend server.
 - `src/`: React/TypeScript owner and verifier UI; PWA assets in `public/`.
 - `scripts/zk-smoke.mjs`: positive proofs and negative circuit/verifier tests.
+- `docs/assets/`: brand and concept imagery used above.
 
-See [security boundaries](docs/SECURITY.md), [validation](docs/VALIDATION.md), and [contract details](contracts/README.md). Hosting, recording and submitting the hackathon form are not performed by this repository.
-
+See [security boundaries](docs/SECURITY.md), [validation](docs/VALIDATION.md), [desktop quickstart](docs/DESKTOP-QUICKSTART.md), and [contract details](contracts/README.md). Hosting, recording and submitting the hackathon form are not performed by this repository.
