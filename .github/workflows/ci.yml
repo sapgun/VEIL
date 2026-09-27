@@ -1,0 +1,40 @@
+name: VEIL desktop validation
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: veil-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - name: Check landing and app deep links
+        run: |
+          node server/http.mjs > /tmp/veil.log 2>&1 &
+          for i in 1 2 3 4 5; do curl -fsS http://127.0.0.1:43127/ > /tmp/landing.html && break || sleep 1; done
+          curl -fsS http://127.0.0.1:43127/app > /tmp/app.html
+          curl -fsS http://127.0.0.1:43127/app/ > /tmp/app-slash.html
+          curl -fsS 'http://127.0.0.1:43127/verifier?context=daily' > /tmp/verifier.html
+          curl -fsS http://127.0.0.1:43127/veil-portrait.svg > /tmp/portrait.svg
+          cmp /tmp/landing.html /tmp/app.html
+          cmp /tmp/landing.html /tmp/app-slash.html
+          grep -q 'id="root"' /tmp/app.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: veil-desktop-build
+          path: dist
+          retention-days: 7
