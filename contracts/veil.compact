@@ -1,5 +1,5 @@
-// VEIL persona architecture scaffold. NOT compiled, deployed or connected to UI.
-// This is not byte-compatible with the local HMAC/Ed25519 demo protocol.
+// VEIL: compiled with Compact 0.30.0; real proofs verified on an offline ledger.
+// UI personas use this same Compact persistentHash construction.
 pragma language_version >= 0.20;
 
 import CompactStandardLibrary;
@@ -38,7 +38,7 @@ export circuit enroll(commitment: Bytes<32>): [] {
 }
 
 // requestDigest must bind the verifier's complete action/amount/expiry/domain.
-// This scaffold binds a digest, but does NOT enforce those policy fields yet.
+// This circuit binds a digest; policy fields are enforced by the local Core.
 export circuit authorize(context: Bytes<32>, requestDigest: Bytes<32>, nonce: Bytes<32>): [] {
   const p = disclose(personaId(checkedRoot(), context));
   assert(!revokedPersonas.member(p), "Persona revoked");
@@ -61,3 +61,4 @@ export circuit linkSelected(contextA: Bytes<32>, contextB: Bytes<32>, challenge:
 export circuit revoke(context: Bytes<32>): [] {
   revokedPersonas.insert(disclose(personaId(checkedRoot(), context)));
 }
+

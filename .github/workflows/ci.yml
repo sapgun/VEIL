@@ -12,7 +12,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,6 +22,21 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm test
+      - name: Compile real Compact circuits
+        run: |
+          curl -fsSL https://github.com/midnightntwrk/compact/releases/download/compactc-v0.30.0/compactc_v0.30.0_x86_64-unknown-linux-musl.zip -o /tmp/compact.zip
+          mkdir -p /tmp/compact
+          unzip -q /tmp/compact.zip -d /tmp/compact
+          chmod +x /tmp/compact/*
+          /tmp/compact/compactc contracts/veil.compact contracts/managed/veil
+      - name: Verify real Midnight proofs
+        run: |
+          docker compose up -d proof-server
+          for i in $(seq 1 90); do
+            if curl -s -o /dev/null http://127.0.0.1:6300/; then break; fi
+            sleep 2
+          done
+          npm run test:zk
       - name: Check landing and app deep links
         run: |
           node server/http.mjs > /tmp/veil.log 2>&1 &
@@ -38,3 +53,4 @@ jobs:
           name: veil-desktop-build
           path: dist
           retention-days: 7
+

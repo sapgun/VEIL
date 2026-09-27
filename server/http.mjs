@@ -61,19 +61,24 @@ export function createApp(core = createCore()) {
         const body = JSON.parse(buffer || "{}");
         switch (path) {
           case "/api/owner/setup":
-            return send(200, core.setup());
+            return send(200, await core.setup());
           case "/api/owner/reset":
-            return send(200, core.reset());
+            return send(200, await core.reset());
           case "/api/owner/revoke":
-            return send(200, core.revoke(body.context));
+            return send(200, await core.revoke(body.context));
           case "/api/owner/authorize":
-            return send(200, core.authorize(body.context, body.amount));
+            return send(200, await core.authorize(body.context, body.amount));
           case "/api/owner/link":
-            return send(200, core.link(body.contexts, body.consent));
+            return send(200, await core.link(body.contexts, body.consent));
           case "/api/public/execute":
-            return send(200, core.execute(body.envelope, body.context, body.nonce));
+            return send(
+              200,
+              await core.execute(body.envelope, body.context, body.nonce),
+            );
+          case "/api/public/verify-proof":
+            return send(200, core.verifyProof(body.envelope));
           case "/api/public/verify-link":
-            return send(200, core.verifyLink(body.envelope));
+            return send(200, await core.verifyLink(body.envelope));
           default:
             return send(404, { error: "Route not found" });
         }
@@ -81,9 +86,10 @@ export function createApp(core = createCore()) {
       if (req.method !== "GET")
         return send(405, { error: "Method not allowed" });
       const decoded = decodeURIComponent(path);
-      const relative = ["/", "/app", "/app/", "/verifier"].includes(decoded)
-        ? "index.html"
-        : decoded.slice(1);
+      const relative =
+        ["/", "/app", "/app/", "/verifier"].includes(decoded)
+          ? "index.html"
+          : decoded.slice(1);
       const filename = resolve(dist, relative);
       if (!filename.startsWith(resolve(dist) + sep))
         return send(403, { error: "Forbidden path" });
@@ -101,17 +107,25 @@ export function createApp(core = createCore()) {
       res.end(content);
     } catch (error) {
       send(error.code === "ENOENT" ? 404 : 400, {
-        error: error.code === "ENOENT"
-          ? "Build the frontend first with npm run build"
-          : error.message,
+        error:
+          error.code === "ENOENT"
+            ? "Build the frontend first with npm run build"
+            : error.message,
       });
     }
   });
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (
+  process.argv[1] &&
+  resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
   const port = Number(process.env.PORT ?? 43127);
-  createApp().listen(port, "127.0.0.1", () =>
-    console.log(`VEIL Desktop Core: http://127.0.0.1:${port} (local signed mode; not Midnight ZK)`),
+  const { createZkCore } = await import("./zk-core.mjs");
+  createApp(createZkCore()).listen(port, "127.0.0.1", () =>
+    console.log(
+      `VEIL Desktop Core: http://127.0.0.1:${port} (Midnight ZK; offline ledger, simulated actions)`,
+    ),
   );
 }
+

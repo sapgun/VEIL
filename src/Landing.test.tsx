@@ -16,9 +16,11 @@ describe("VEIL landing", () => {
     expect(html).toContain("Reveal only");
     expect(html).not.toContain("iPhone");
   });
-  it("does not represent local signatures as a deployed Midnight proof", () => {
+  it("distinguishes real offline proofs from public-network deployment", () => {
     const html = renderToStaticMarkup(<Landing />);
-    expect(html).toContain("not Midnight zero-knowledge proofs");
+    expect(html).toContain("real Midnight zero-knowledge proofs");
+    expect(html).toContain("No public-network deployment");
     expect(html).toContain("No real funds or personal documents");
   });
 });
+

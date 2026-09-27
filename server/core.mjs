@@ -69,7 +69,11 @@ export function verifySignature(envelope, publicKey) {
 }
 
 /** Trusted, single-owner desktop demo core. Signatures are real; these are NOT ZK proofs. */
-export function createCore({ now = Date.now } = {}) {
+export function createCore({
+  now = Date.now,
+  makeRoot = () => randomBytes(32),
+  personaDeriver = derivePersona,
+} = {}) {
   const keys = generateKeyPairSync("ed25519");
   let root;
   let active = false;
@@ -159,7 +163,7 @@ export function createCore({ now = Date.now } = {}) {
     snapshot,
     setup() {
       check(!root, "Root already exists; reset the demo to create another");
-      root = randomBytes(32);
+      root = makeRoot();
       active = true;
       personas = new Map(
         Object.entries(CONTEXTS).map(([context, definition]) => [
@@ -167,7 +171,7 @@ export function createCore({ now = Date.now } = {}) {
           {
             ...definition,
             context,
-            id: derivePersona(root, context),
+            id: personaDeriver(root, context),
             revoked: false,
             mandateExpiresAt: now() + 3_600_000,
           },

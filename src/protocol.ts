@@ -1,5 +1,14 @@
 export type Context = "daily" | "api" | "defi";
-export type Envelope = { payload: string; signature: string };
+export type ZkProof = {
+  verified: boolean;
+  circuit: string;
+  transactionHash: string;
+  transaction: string;
+  transactionBytes: number;
+  elapsedMs: number;
+  network: string;
+};
+export type Envelope = { payload: string; signature: string; zk?: ZkProof };
 export type Persona = {
   context: Context;
   name: string;
@@ -18,6 +27,7 @@ export type State = {
   personas: Persona[];
   latestLink: Envelope | null;
   serverTime: number;
+  latestProof?: ZkProof | null;
 };
 export type PublicView = {
   context: Context;
@@ -59,10 +69,15 @@ export async function verifyEnvelope(envelope: Envelope): Promise<boolean> {
   const signature = Uint8Array.from(atob(envelope.signature), (char) =>
     char.charCodeAt(0),
   );
-  return crypto.subtle.verify(
+  const signed = await crypto.subtle.verify(
     "Ed25519",
     publicKey,
     signature,
     new TextEncoder().encode(envelope.payload),
   );
+  if (!signed) return false;
+  if (JSON.parse(envelope.payload).kind === "execution") return true;
+  if (!envelope.zk) return false;
+  return (await api<{ valid: boolean }>("public/verify-proof", { envelope }))
+    .valid;
 }

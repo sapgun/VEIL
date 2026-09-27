@@ -24,7 +24,22 @@ const short = (id: string) => `${id.slice(0, 10)}…${id.slice(-6)}`;
 function Receipt({ envelope }: { envelope: Envelope }) {
   return (
     <details className="receipt">
-      <summary>Inspect signed receipt</summary>
+      <summary>Inspect proof and receipt</summary>
+      {envelope.zk && (
+        <div className="execution">
+          <strong>✓ MIDNIGHT ZK VERIFIED</strong>
+          <p>
+            {envelope.zk.circuit} ·{" "}
+            {envelope.zk.transactionBytes.toLocaleString()} transaction bytes ·{" "}
+            {(envelope.zk.elapsedMs / 1000).toFixed(1)}s
+          </p>
+          <code className="signature">{envelope.zk.transactionHash}</code>
+          <p className="micro">
+            Real proof verified by Midnight ledger locally. No network
+            submission.
+          </p>
+        </div>
+      )}
       <pre>{JSON.stringify(JSON.parse(envelope.payload), null, 2)}</pre>
       <p className="micro">
         Ed25519 signature over the exact payload · no root identifier included
@@ -51,7 +66,7 @@ function Header({ verifier = false }: { verifier?: boolean }) {
           Source ↗
         </a>
         <span className="network">
-          <i /> LOCAL SIGNED MODE
+          <i /> MIDNIGHT ZK / LOCAL
         </span>
       </nav>
     </header>
@@ -62,9 +77,9 @@ function Notice() {
     <div className="notice">
       <span>PROTOTYPE BOUNDARY</span>
       <p>
-        Real persona derivation and signature checks. Mock issuer and simulated
-        actions. Midnight ZK and encrypted phone pairing are not connected. The
-        local Core knows the persona relationships.
+        Real Midnight ZK proofs verified against a local ledger. Mock issuer and
+        simulated actions; no public network deployment. The trusted Core holds
+        the root. Encrypted phone pairing is not connected.
       </p>
     </div>
   );
@@ -129,8 +144,8 @@ function Verifier() {
           <p className="center muted">
             {view?.envelope
               ? verified
-                ? "Signature verified against the connected Core key"
-                : "Signature not verified"
+                ? "Midnight ZK proof and receipt signature verified"
+                : "Proof not verified"
               : "Authorize this context in the owner dashboard first."}
           </p>
           {view?.envelope && <Receipt envelope={view.envelope} />}
@@ -379,6 +394,14 @@ function Owner() {
             )}
           </div>
         </section>
+        {state.latestProof && (
+          <p className="execution" role="status">
+            ✓ Midnight ZK verified: {state.latestProof.circuit} ·{" "}
+            {state.latestProof.transactionBytes.toLocaleString()} transaction
+            bytes · {(state.latestProof.elapsedMs / 1000).toFixed(1)}s · offline
+            ledger
+          </p>
+        )}
         <section className="personas-section">
           <div className="section-title">
             <div>
@@ -476,7 +499,7 @@ function Owner() {
                 }}
               />
               <p className="micro">
-                Private mandate limit: {selected?.limit ?? "—"}. Try a higher
+                Demo mandate limit: {selected?.limit ?? "—"}. Try a higher
                 amount to demonstrate denial.
               </p>
               <button
@@ -484,7 +507,9 @@ function Owner() {
                 className="primary"
                 disabled={busy || !connected || !state.root}
               >
-                {busy ? "Processing…" : "Request authorization ↗"}
+                {busy
+                  ? "Generating ZK proof…"
+                  : "Generate Midnight ZK proof ↗"}
               </button>
             </form>
             <p className="micro">
@@ -513,7 +538,7 @@ function Owner() {
                 {execution
                   ? JSON.parse(execution.payload).description
                   : receipt
-                    ? "Ed25519 signature verified. Root identity omitted."
+                    ? "Midnight ZK verified. Hidden root membership proven."
                     : "Only the selected persona and its scoped authorization."}
               </p>
             </div>
@@ -522,7 +547,7 @@ function Owner() {
               <strong>NOT DISCLOSED</strong>
               <span>Other persona IDs</span>
               <strong>NOT DISCLOSED</strong>
-              <span>Full mandate</span>
+              <span>Other context activity</span>
               <strong>NOT DISCLOSED</strong>
             </div>
             <button
@@ -583,8 +608,9 @@ function Owner() {
               from the signed relationship statement.
             </p>
             <p className="micro">
-              This is a Core-attested relationship, not a zero-knowledge proof.
-              It trusts the local Core.
+              A real Midnight proof demonstrates that both selected personas
+              derive from the same hidden, enrolled root. The third persona is
+              not disclosed.
             </p>
           </div>
           <div className="link-controls">
@@ -639,12 +665,12 @@ function Owner() {
                       throw new Error("Link signature failed");
                     await api("public/verify-link", { envelope: result });
                     setLink(result);
-                    setLinkStatus("SAME HIDDEN PRINCIPAL — CORE ATTESTED");
+                    setLinkStatus("SAME HIDDEN PRINCIPAL — ZK VERIFIED");
                     setConsent(false);
                   })
                 }
               >
-                Create selective link attestation ↗
+                Generate selective link ZK proof ↗
               </button>
             </fieldset>
             {link && (
@@ -670,7 +696,7 @@ function Owner() {
                       setLinkStatus("CHECKING");
                       try {
                         await api("public/verify-link", { envelope: link });
-                        setLinkStatus("CURRENT RELATIONSHIP VERIFIED BY CORE");
+                        setLinkStatus("ZK VERIFIED · CURRENTLY VALID");
                       } catch (cause) {
                         setLinkStatus("NOT CURRENTLY VALID");
                         throw cause;
@@ -691,9 +717,9 @@ function Owner() {
             <h2>The privacy target.</h2>
             <p className="muted">
               A hidden root membership proof, context-bound authorization,
-              consented same-root proof and revocation. Updated Compact source
-              is included; compilation, proving and network deployment remain
-              unverified.
+              consented same-root proof and revocation. Compact compilation and
+              real proof verification run locally. Network deployment and funded
+              transactions remain out of scope.
             </p>
           </div>
           <div className="reset-box">

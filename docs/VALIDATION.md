@@ -1,34 +1,19 @@
-# v0.2 validation
+# Validation — 2026-09-27
 
-Environment: Node.js 22.14.0, npm 10.9.2, Windows, 2026-09-27.
+## Passed
 
-## Automated checks
+- Compact 0.30.0 syntax/type check and **full proof-key generation** for `enroll`, `authorize`, `linkSelected`, `revoke`.
+- Official Midnight proof-server 8.0.3 generated real proofs; ledger-v8 8.0.3 verified and applied them to an in-memory ledger with contract-proof verification enabled.
+- `npm run test:zk`: DAILY/API/DEFI authorization proofs; consented same-root link; revocation proof; altered transaction rejected; circuit-level nonce replay, duplicate-context link, revoked authorization and revoked link rejected; execution replay, excess amount, missing consent and reset invalidation checked.
+- Observed authorization transactions: 5,331–5,333 bytes; proof + validation around 3.7–4.0 seconds on this machine. Sizes/timings vary. Transaction byte count includes more than the proof.
+- `npm test`: 29 Core, HTTP boundary and landing tests passed.
+- `npm run build`: TypeScript and production frontend passed.
 
-- TypeScript checking and Vite production build pass.
-- **26 tests pass** across the private Core and HTTP layer.
-- Tests cover three context successes, deterministic/domain-separated persona derivation, missing root, tampered signatures, other-Core signatures, wrong context/challenge, invalid/over-limit amounts, replay, exact-deadline expiry, persona/root revocation, reset, receipt field minimization, consent, pair validation, link expiry and current revocation.
-- HTTP tests exercise owner-token requirements, forbidden Origin and Host, the full request/execute/link/revoke flow, and malformed JSON.
+## Important limits
 
-These checks are for the local HMAC/Ed25519 implementation. They are not Compact or Midnight proof tests.
+No network deployment/finality, funded wallet, real credentials, commerce settlement, independent external verifier, native app, encrypted phone pairing or physical-device PWA installation is claimed. Fee balancing alone is disabled for local proof verification. Policy semantics beyond root membership, derivation, revocation and nonce uniqueness are Core-enforced.
 
-## Browser observations
+The compiler/prover ran using Linux on this Windows workstation. A project-specific `VEIL-ZK` WSL distribution was imported from the official proof-server image under `D:\DevEnv\WSL\VEIL-ZK`. Repository reproduction uses the documented supported compiler plus Docker Compose; generated binaries/keys are not checked in.
 
-Production app served by the actual Desktop Core at loopback:
+Browser validation also passed: root enrollment, authorization proof, simulated execution and consented DAILY + DEFI link proof. The concurrent desktop landing and /app route were preserved during integration.
 
-- Mock root creation displays three distinct persona IDs.
-- DAILY, API and DEFI each authorize, verify the signature and execute their simulated action.
-- Replaying an execution yields a server rejection.
-- Explicit DAILY + DEFI consent produces a same-principal Core attestation naming only that pair.
-- Revoking DAILY makes its next authorization fail and leaves execution disabled.
-- A 390px-wide mobile viewport renders without horizontal overflow.
-
-Interactions were verified with keyboard-based browser automation; this does not establish physical-device touch or native-install behavior.
-
-## Not verified / not implemented
-
-- Compact compilation, generated circuit execution, actual ZK proofs, wallet signing, network transactions or cryptographic unlinkability.
-- QR/encrypted mobile/Desktop pairing; loopback currently restricts use to the host machine.
-- Native mobile app, real KYC/credential issuer, actual API commerce or settlement.
-- Production hosting, multi-user isolation, physical-device PWA installation, full accessibility audit, video or hackathon submission.
-
-The native-Windows Compact wrapper intentionally stops rather than invoking the operating system compression utility. No compiler success is inferred from web tests.

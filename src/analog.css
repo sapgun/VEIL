@@ -61,3 +61,4 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 /* A narrow-window fallback, not a separate mobile product. */
 @media(max-width:800px){.veil-landing{padding:0 6%}.veil-header{height:78px;min-height:78px}.veil-header nav{gap:18px}.veil-header nav>a:first-child{display:none}.veil-hero{height:auto;min-height:650px;grid-template-columns:1fr}.veil-hero-copy{padding:80px 0 100px}.veil-hero h1{font-size:58px}.veil-hero-art{width:90%;right:-6%;opacity:.28}.veil-kicker{font-size:8px}.veil-principles{grid-template-columns:1fr;gap:34px;padding:38px 0}.veil-principles p{max-width:none}.veil-boundary{grid-template-columns:1fr;gap:12px}.veil-hero-bottom{font-size:7px}.veil-hero-bottom>a{display:none}.veil-footer>span{display:none}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.veil-button{transition:none}.veil-button:hover{transform:none}}
+

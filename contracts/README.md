@@ -1,42 +1,23 @@
-# VEIL Compact integration scaffold
+# VEIL Compact circuits
 
-The source now models the actual VEIL direction: issuer-gated root enrollment, hidden membership, domain-separated personas, authorization commitments, selected same-root links and persona revocation.
-
-**Status: uncompiled source scaffold.** It is not called by the web demo and has no deployed address or generated proof artifacts. There is no claim that these circuits currently compile or provide a reviewed privacy protocol.
-
-## Source design
-
-- `enroll`: checks knowledge of the issuer secret before adding a root commitment to a Merkle tree.
-- `checkedRoot`: checks the private path leaf against the hidden root secret and the derived Merkle digest against the public tree.
-- `authorize`: derives a context persona, rejects revocation/reused requests, and records a commitment binding persona, request digest and nonce.
-- `linkSelected`: uses one private root to derive two chosen context personas, checks both are active, and records a challenge-bound pair commitment. It does not include a third persona.
-- `revoke`: requires root knowledge/membership to revoke the derived context persona.
-
-The sketch uses a Merkle path rather than publicly looking up a root identifier during each authorization. That choice avoids introducing an obvious shared root key in the authorization lookup, but does not itself prove end-to-end unlinkability. Enrollment, transaction metadata, the membership set size and other transcript data need review.
-
-## Compile
-
-The compatibility target remains **Compact toolchain 0.30.0**. It is not a claim of the newest release. Use the official [Compact tools](https://docs.midnight.network/compact/compilation-and-tooling/dev-tool-usage) on a supported Linux/macOS environment (or a properly configured WSL development distro).
+Compiled and proved with Compact **0.30.0**, runtime **0.15.0**, proof-server / ledger **8.0.3**. This is a compatibility-pinned set, not a claim of the newest releases.
 
 ```sh
 compact update 0.30.0
-compact compile +0.30.0 --version
-npm run contract:check
-npm run contract:build
+npm run contract:check  # syntax/types, no keys
+npm run contract:build  # full keys + ZKIR + generated JS
+npm run test:zk        # requires local proof server
 ```
 
-`contract:check` skips proof-key generation. `contract:build` performs the full compile. Both use the version-pinned wrapper and write ignored generated output to `contracts/managed/veil`. Native Windows is rejected to avoid invoking Windows' unrelated `compact.exe` compression utility.
+Generated artifacts are ignored at `contracts/managed/veil/`. The real Core imports generated JS and loads `.prover`, `.verifier` and `.bzkir` files. Recompile after any contract edit. The structural witness example in `witnesses.ts` is illustrative; the actual runtime adapter is in `server/midnight.mjs`.
 
-The current machine had no Midnight compiler or ordinary Linux development distro available; only a Docker-internal WSL distro was listed. No operating-system installation or manipulation of that internal distro was performed.
+- `enroll`: issuer-secret knowledge gates adding a root commitment to a Merkle tree.
+- `authorize`: private root membership, context-derived persona, revocation and nonce replay checks; commits to the exact receipt digest.
+- `linkSelected`: two distinct contexts derived from the same hidden root; both must be active; binds the selected-link receipt digest.
+- `revoke`: private root membership authorizes persona revocation.
 
-## Mandatory integration gaps
+The adapter rehashes the public Merkle tree after decoding its state before transcript partitioning. This handles the SDK 2.5.0 state-conversion cache behavior without changing leaves or skipping proof checks.
 
-1. Compile against the selected toolchain, repair any syntax/type/disclosure incompatibilities and test generated circuit execution. The consulted online reference may describe newer language releases.
-2. Implement issuer enrollment and membership-path construction using generated types. The generic witness adapter must be checked against the generated `Witnesses` type, not cast to hide errors.
-3. Enforce mandate fields **inside the circuit**. The current `requestDigest` only binds a request: it does not constrain amount, target, agent, action or expiry by itself.
-4. Define network/contract domain separation, authenticated agent possession, trusted clock semantics, root revocation and issuer revocation. Current source only sketches persona revocation.
-5. Define verifier consumption and link disclosure semantics. Owner consent is handled by the current UI/Core; a future proving API must authenticate the owner and bind the exact pair and intended verifier.
-6. Wire compatible Midnight private-state, proof, wallet and public-data providers. Local HMAC/Ed25519 values are **not byte-compatible** with Compact's hash construction; do not reuse their IDs as if they were generated circuit outputs.
-7. Test wrong root/path/issuer/context, replay, revocation, mismatched pair and transcript disclosure; then verify actual proofs and network finality.
+The current circuit does not independently enforce amount/action/expiry/consent policy. Those fields are checked by the Core and bound via the receipt digest. Root revocation in the UI proves revocation of all three known personas; there is no universal on-chain root-revocation registry. Network/contract-specific domain separation, issuer lifecycle and production anonymity analysis remain required.
 
-References consulted: [Compact reference](https://docs.midnight.network/compact/reference/compact-reference), [ledger data types](https://docs.midnight.network/compact/reference/ledger-adt), [standard library](https://docs.midnight.network/compact/standard-library/exports), and [official compiler platforms](https://github.com/LFDT-Minokawa/compact).
+References: [Compact tools](https://docs.midnight.network/compact/compilation-and-tooling/dev-tool-usage), [official compatibility matrix](https://github.com/midnightntwrk/midnight-sdk/blob/main/COMPATIBILITY.md), [Compact reference](https://docs.midnight.network/compact/reference/compact-reference).
