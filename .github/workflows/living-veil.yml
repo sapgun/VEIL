@@ -1,0 +1,36 @@
+name: Living Veil browser validation
+on:
+  push:
+    branches: [main, design/living-veil]
+    paths: ['src/landing/**', 'public/veil/motion/**', 'scripts/test-living-veil.mjs', '.github/workflows/living-veil.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: living-veil-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - name: Install temporary browser QA tools (no lockfile changes)
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Test the built page with real WebGL2
+        run: node scripts/test-living-veil.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: living-veil-browser
+          path: test-artifacts/living-veil
+          retention-days: 7

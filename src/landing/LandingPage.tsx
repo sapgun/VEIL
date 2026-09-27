@@ -4,6 +4,7 @@ import { DisclosurePreview } from './DisclosurePreview';
 import { principles, repository, securityDoc, steps, validationDoc } from './content';
 import './tokens.css';
 import './landing.css';
+import LivingVeil from './motion/LivingVeil';
 
 function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -58,5 +59,5 @@ function FinalCTA() {
 }
 
 export default function LandingPage() {
-  return <div className="vl-site" data-veil-version="editorial-1"><a className="vl-skip" href="#vl-main">Skip to content</a><Header /><main id="vl-main"><Hero /><PrincipleStrip /><Philosophy /><Experience /><Flow /><Boundaries /><FinalCTA /></main><footer className="vl-footer vl-container"><Wordmark footer /><span>A MORE INTENTIONAL INTERNET.</span><div><a href={securityDoc} target="_blank" rel="noreferrer">Security boundaries<Icon name="arrow-up-right" size={12} /></a><a href={repository} target="_blank" rel="noreferrer">Source<Icon name="arrow-up-right" size={12} /></a></div></footer></div>;
+  return <div className="vl-site" data-veil-version="editorial-living-1"><a className="vl-skip" href="#vl-main">Skip to content</a><Header /><main id="vl-main"><Hero /><PrincipleStrip /><LivingVeil /><Philosophy /><Experience /><Flow /><Boundaries /><FinalCTA /></main><footer className="vl-footer vl-container"><Wordmark footer /><span>A MORE INTENTIONAL INTERNET.</span><div><a href={securityDoc} target="_blank" rel="noreferrer">Security boundaries<Icon name="arrow-up-right" size={12} /></a><a href={repository} target="_blank" rel="noreferrer">Source<Icon name="arrow-up-right" size={12} /></a></div></footer></div>;
 }
