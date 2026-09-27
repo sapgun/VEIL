@@ -1,13 +1,13 @@
-name: Living Veil browser validation
+name: VEIL atmosphere C browser validation
 on:
   push:
-    branches: [main, design/living-veil]
-    paths: ['src/landing/**', 'public/veil/motion/**', 'scripts/test-living-veil.mjs', '.github/workflows/living-veil.yml']
+    branches: [main, design/atmosphere-c]
+    paths: ['src/landing/**', 'src/Landing.test.tsx', 'public/veil/**', 'scripts/test-living-veil.mjs', '.github/workflows/living-veil.yml']
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: living-veil-${{ github.ref }}
+  group: veil-atmosphere-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   browser:
@@ -22,16 +22,16 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm test
-      - name: Install isolated browser QA tools (no application dependency changes)
+      - name: Install isolated browser QA (no application dependency changes)
         run: |
           npm install --prefix /tmp/veil-browser-tools playwright@1.55.0 --ignore-scripts
           ln -s /tmp/veil-browser-tools/node_modules/playwright node_modules/playwright
           /tmp/veil-browser-tools/node_modules/.bin/playwright install --with-deps chromium
-      - name: Test the built page with real WebGL2
+      - name: Validate the built page at desktop and mobile sizes
         run: node scripts/test-living-veil.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: living-veil-browser
-          path: test-artifacts/living-veil
+          name: veil-atmosphere-c-browser
+          path: test-artifacts/atmosphere-c
           retention-days: 7

@@ -1,0 +1,78 @@
+/* C / atmospheric editorial. No isolated stage, pinning, stripes or avatar masks. */
+.vl-site::before { opacity: .22; }
+.vl-site .vl-atmosphere { position: fixed; inset: -8vh -5vw; z-index: 0; overflow: hidden; pointer-events: none; contain: strict; }
+.vl-site .vl-atmo-sheet { position: absolute; inset: 0; background-position: center; background-size: 100% 100%; background-repeat: no-repeat; transform-origin: 50% 15%; pointer-events: none; }
+.vl-site .vl-atmo-near { background-image: url('/veil/atmosphere/veil-near.svg'); opacity: .36; }
+.vl-site .vl-atmo-mid { background-image: url('/veil/atmosphere/veil-mid.svg'); opacity: .23; }
+.vl-site .vl-atmo-far { background-image: url('/veil/atmosphere/veil-far.svg'); opacity: .38; }
+/* Keep every text and interaction above the material. Not a brightness/filter on the UI. */
+.vl-site > main, .vl-site > .vl-footer { position: relative; z-index: 1; }
+.vl-site .vl-header { z-index: 20; }
+.vl-site section[id] { scroll-margin-top: var(--vl-header-clearance, 110px); }
+.vl-site .vl-signal { background: #131313b8; }
+.vl-site .vl-final { background-color: #121212; }
+/* Photographic echoes live inside the existing hero artwork. No extra scene height. */
+.vl-site .vl-artwork { isolation: isolate; }
+.vl-site .vl-presence { position: absolute; inset: -18px -18px 74px -14px; pointer-events: none; z-index: 1; }
+.vl-site .vl-presence-echo { position: absolute; width: 256px; height: 320px; top: 24px; left: calc(50% - 128px); mask-image: radial-gradient(ellipse 50% 50%,#000 70%,transparent 100%); transform-origin: center; }
+.vl-site .vl-presence-echo img { display: block; width: 100%; height: 100%; filter: grayscale(1); }
+.vl-site .vl-presence-echo--0 { transform: translate3d(-90px,18px,0) scale(.925); opacity: .22; filter: blur(1px); }
+.vl-site .vl-presence-echo--1 { opacity: .76; z-index: 1; }
+.vl-site .vl-presence-echo--2 { transform: translate3d(105px,28px,0) scale(.925); opacity: .17; filter: blur(2px); }
+.vl-site .vl-presence-gauze { position: absolute; inset: -44px -50px 0 -80px; background: url('/veil/atmosphere/veil-mid.svg') center/100% 100% no-repeat; opacity: .6; z-index: 2; mask-image: radial-gradient(ellipse,#000 40%,transparent 73%); }
+.vl-site .vl-archive-sheet { opacity: .19; top: 60px; right: 76px; transform: rotate(12deg); z-index: 0; }
+.vl-site .vl-art-grid { opacity: .08; }
+.vl-site .vl-vellum { display: none; }
+.vl-site .vl-envelope { z-index: 3; width: 420px; right: -4px; bottom: 50px; transform: rotate(-8deg); opacity: .94; }
+.vl-site .vl-envelope .vl-envelope-seal { width: 80px; height: 80px; left: calc(50% - 40px); }
+.vl-site .vl-art-callout { z-index: 4; top: 205px; left: -8px; background: #181818ed; border-color: #44413b; box-shadow: 0 12px 30px #0003; }
+.vl-site .vl-art-note { z-index: 4; right: -15px; top: 57px; }
+.vl-site .vl-art-registration { opacity: .3; }
+.vl-site .vl-art-index { z-index: 4; }
+.vl-site .vl-ambient-control { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 6px 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: var(--vl-dim); font: 10px/1.5 var(--vl-sans); white-space: nowrap; }
+.vl-site .vl-ambient-control:hover { color: var(--vl-text); }
+.vl-site .vl-ambient-control > span:last-child { font-size: 9px; color: var(--vl-muted); margin-left: 3px; }
+.vl-site .vl-ambient-dot { width: 5px; height: 5px; border: 1px solid #aaa; border-radius: 50%; }
+.vl-site .vl-ambient-control[aria-pressed='true'] .vl-ambient-dot { background: #bbb; }
+@media(max-width:1100px) {
+  .vl-site .vl-envelope { width: 380px; }
+  .vl-site .vl-art-callout { left: -18px; }
+}
+@media(max-width:959px) {
+  .vl-site .vl-atmosphere { inset: -5vh -14vw; }
+  .vl-site .vl-atmo-near { opacity: .30; background-size: auto 118%; background-position: 43% 50%; }
+  .vl-site .vl-atmo-mid { opacity: .20; }
+  .vl-site .vl-atmo-far { opacity: .27; }
+  .vl-site .vl-presence-echo--0, .vl-site .vl-presence-echo--2 { display: none; }
+  .vl-site .vl-presence-echo--1 { opacity: .76; }
+  .vl-site .vl-art-note { right: 0; }
+  .vl-site .vl-ambient-control { min-height: 44px; }
+}
+@media(max-width:650px) {
+  .vl-site .vl-artwork { height: 350px; margin-top: 12px; }
+  .vl-site .vl-presence { inset: -10px -12px 28px; }
+  .vl-site .vl-presence-echo { width: 218px; height: 272.5px; top: 0; left: calc(50% - 109px); }
+  .vl-site .vl-archive-sheet { width: 170px; height: 247px; top: 21px; right: 16%; }
+  .vl-site .vl-envelope { width: 290px; max-width: 88%; bottom: 15px; right: 1%; transform: rotate(-6deg); }
+  .vl-site .vl-envelope .vl-envelope-seal { width: 61px; height: 61px; left: calc(50% - 30.5px); }
+  .vl-site .vl-art-callout { width: 125px; top: 138px; left: 0; padding: 14px; }
+  .vl-site .vl-art-callout > div { font-size: 16px; }
+  .vl-site .vl-art-callout > .vl-icon { margin-bottom: 8px; }
+  .vl-site .vl-art-callout .vl-callout-rule, .vl-site .vl-art-callout > .vl-micro { display: none; }
+  .vl-site .vl-art-note { top: 5px; right: 0; }
+  .vl-site .vl-art-note p { font-size: 15px; }
+  .vl-site .vl-art-note .vl-note-rule { display: none; }
+  .vl-site .vl-art-index { bottom: 0; font-size: 7px; }
+  .vl-site .vl-art-registration { display: none; }
+  .vl-site .vl-footer { flex-wrap: wrap; }
+  .vl-site .vl-footer > div { flex-wrap: wrap; gap: 18px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .vl-site .vl-atmo-sheet { transform: none !important; }
+  .vl-site .vl-presence-echo { transform: none !important; }
+  .vl-site .vl-presence-echo--0, .vl-site .vl-presence-echo--2 { display: none; }
+  .vl-site .vl-presence-echo--1 { opacity: .76 !important; }
+}
+
+/* Avoid legacy mobile scale/margins pulling the hero art across the next section. */
+@media(max-width:650px){.vl-site .vl-artwork{transform:none;margin:12px 0 0;width:100%;height:350px;} .vl-site .vl-envelope{bottom:32px;} .vl-site .vl-art-index{bottom:10px;}}

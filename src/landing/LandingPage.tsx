@@ -4,7 +4,7 @@ import { DisclosurePreview } from './DisclosurePreview';
 import { principles, repository, securityDoc, steps, validationDoc } from './content';
 import './tokens.css';
 import './landing.css';
-import LivingVeil from './motion/LivingVeil';
+import { Atmosphere, AtmosphereProvider, AtmosphereControl, PhotoPresence } from './atmosphere/Atmosphere';
 
 function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -20,8 +20,7 @@ function ArchiveArtwork() {
   return <div className="vl-artwork" aria-hidden="true">
     <img className="vl-art-grid" src="/veil/archive-grid.svg" width="800" height="800" alt="" />
     <div className="vl-archive-sheet"><img src="/veil/archival-paper.svg" width="480" height="640" alt="" /><span className="vl-document-caption">DISCLOSURE RECORD<br />PRIVATE ARCHIVE / 001</span></div>
-    <figure className="vl-portrait-frame"><picture><source type="image/webp" srcSet="/veil/portrait-256.webp 256w, /veil/portrait-512.webp 512w" sizes="256px" /><img src="/veil/portrait-512.webp" width="512" height="512" alt="" fetchPriority="high" decoding="async" /></picture><figcaption>IDENTITY IS YOURS TO REVEAL.</figcaption></figure>
-    <img className="vl-vellum" src="/veil/vellum.svg" alt="" width="400" height="560" />
+    <PhotoPresence />
     <div className="vl-envelope"><img src="/veil/envelope.svg" width="640" height="420" alt="" /><img className="vl-envelope-seal" src="/veil/wax-seal.svg" width="220" height="220" alt="" /></div>
     <div className="vl-art-note"><span className="vl-micro">SAME PERSON.</span><p>Different contexts.<br /><em>Your terms.</em></p><span className="vl-note-rule" /></div>
     <div className="vl-art-callout"><Icon name="shield-check" size={22} /><div>Reveal only<br /><em>what matters.</em></div><span className="vl-callout-rule" /><span className="vl-micro">LESS EXPOSURE.<br />MORE CHOICE.</span></div>
@@ -51,7 +50,7 @@ function Flow() {
 }
 
 function Boundaries() {
-  return <section className="vl-section vl-container vl-editorial-row vl-boundaries" aria-labelledby="vl-boundaries-title"><SectionHeading index="04" label="BUILT IN THE OPEN" id="vl-boundaries-title" title={<>Trust needs<br />clear boundaries.</>}>A research prototype, not a promise of production anonymity.</SectionHeading><div className="vl-faq"><Disclosure question="What can I try today?"><p>The repository includes context personas, scoped authorization, receipts, verifier views and revocation. Its Midnight prototype works against a local offline ledger. The interaction above is a fictional UI preview, not a cryptographic demonstration.</p><a className="vl-inline-link" href={validationDoc} target="_blank" rel="noreferrer">Read validation notes<Icon name="arrow-up-right" size={14} /></a></Disclosure><Disclosure question="Does opening the website run Midnight proofs?"><p>No. The public frontend does not supply the local Node Core and proof server. Open the app to inspect the interface; follow the repository setup to run the local proof-backed workflow. No public-chain deployment or real settlement is claimed.</p></Disclosure><Disclosure question="What does revocation actually do?"><p>Revocation stops future use when the Core checks current validity. It cannot erase information already disclosed. The trusted Core knows persona relationships, and the local proof server receives private witness data. This single-user prototype is not audited anonymity.</p><a className="vl-inline-link" href={securityDoc} target="_blank" rel="noreferrer">Read the security boundary<Icon name="arrow-up-right" size={14} /></a></Disclosure></div></section>;
+  return <section className="vl-section vl-container vl-editorial-row vl-boundaries" aria-labelledby="vl-boundaries-title"><SectionHeading index="04" label="BUILT IN THE OPEN" id="vl-boundaries-title" title={<>Trust needs<br />clear boundaries.</>}>A research prototype, not a promise of production anonymity.</SectionHeading><div className="vl-faq"><Disclosure question="What can I try today?"><p>The repository includes context personas, scoped authorization, receipts, verifier views and revocation. Its Midnight prototype works against a local offline ledger. The interaction above is a fictional UI preview, not a cryptographic demonstration.</p><a className="vl-inline-link" href={validationDoc} target="_blank" rel="noreferrer">Read validation notes<Icon name="arrow-up-right" size={14} /></a></Disclosure><Disclosure question="Does opening the website run Midnight proofs?"><p>No. The public frontend does not supply the local Node Core and proof server. Open the app to inspect the interface; follow the repository setup to run the local proof-backed workflow. No public-chain deployment or real settlement is claimed.</p></Disclosure><Disclosure question="What does revocation actually do?"><p>Revocation stops future use when the Core checks current validity. It cannot erase information already disclosed. The trusted Core knows persona relationships, and the local proof server receives private witness data. This single-user prototype is not audited anonymity.</p><a className="vl-inline-link" href={securityDoc} target="_blank" rel="noreferrer">Read the security boundary<Icon name="arrow-up-right" size={12} /></a></Disclosure></div></section>;
 }
 
 function FinalCTA() {
@@ -59,5 +58,5 @@ function FinalCTA() {
 }
 
 export default function LandingPage() {
-  return <div className="vl-site" data-veil-version="editorial-living-1"><a className="vl-skip" href="#vl-main">Skip to content</a><Header /><main id="vl-main"><Hero /><PrincipleStrip /><LivingVeil /><Philosophy /><Experience /><Flow /><Boundaries /><FinalCTA /></main><footer className="vl-footer vl-container"><Wordmark footer /><span>A MORE INTENTIONAL INTERNET.</span><div><a href={securityDoc} target="_blank" rel="noreferrer">Security boundaries<Icon name="arrow-up-right" size={12} /></a><a href={repository} target="_blank" rel="noreferrer">Source<Icon name="arrow-up-right" size={12} /></a></div></footer></div>;
+  return <AtmosphereProvider><div className="vl-site" data-veil-version="editorial-atmosphere-c"><Atmosphere /><a className="vl-skip" href="#vl-main">Skip to content</a><Header /><main id="vl-main"><Hero /><PrincipleStrip /><Philosophy /><Experience /><Flow /><Boundaries /><FinalCTA /></main><footer className="vl-footer vl-container"><Wordmark footer /><span>A MORE INTENTIONAL INTERNET.</span><div><AtmosphereControl /><a href={securityDoc} target="_blank" rel="noreferrer">Security boundaries<Icon name="arrow-up-right" size={12} /></a><a href={repository} target="_blank" rel="noreferrer">Source<Icon name="arrow-up-right" size={12} /></a></div></footer></div></AtmosphereProvider>;
 }

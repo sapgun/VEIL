@@ -1,0 +1,13 @@
+{
+  "source": "docs/assets/veil-teaser-dossier.png",
+  "sourceCrop": [128,16,496,496],
+  "sourceNativePixels": [512,512],
+  "exportCanvas": [512,640],
+  "note": "Original supplied photo; native crop, Gaussian diffusion, soft matte #111111. No vector human contours or upscaling.",
+  "files": {
+    "presence.webp": {"bytes":3694,"sha256":"e00153c1a03ebac7c4e91a71a0fae38c3bcb1be96b6b9528de485e661ecd8a0f"},
+    "veil-far.svg": {"bytes":1043,"sha256":"ff897fedfcb37ad04c72056647ea3ec25d1fa6b0cd95b1fa9e19a6154002ffed"},
+    "veil-mid.svg": {"bytes":922,"sha256":"99817b7bfd79009466675276846901604b4c9acadf593bdb03bb857ad40a0d6d"},
+    "veil-near.svg": {"bytes":1282,"sha256":"5f1ce05779e287635dc4b5506a28012f5c19be2712ad67c4d9f2db83fea9c6a3"}
+  }
+}
