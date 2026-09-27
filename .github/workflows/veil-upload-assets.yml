@@ -1,0 +1,62 @@
+name: VEIL editorial package upload
+on:
+  push:
+    branches: [design/veil-editorial-upload]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: veil-editorial-upload
+  cancel-in-progress: false
+jobs:
+  materialize:
+    if: github.repository == 'sapgun/VEIL' && github.ref == 'refs/heads/design/veil-editorial-upload'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: design/veil-editorial-upload
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install asset export tools
+        run: python -m pip install Pillow==12.3.0 CairoSVG==2.8.2
+      - name: Reproduce approved assets from the existing original
+        run: |
+          test "$(git hash-object docs/assets/veil-teaser-intent-protected.png)" = 784039406259d36d97e466a11633eeb7229ecf33
+          cp docs/assets/veil-teaser-intent-protected.png '/tmp/image(20260927-144250).png'
+          python scripts/generate-assets.py --portrait '/tmp/image(20260927-144250).png'
+          python scripts/export-raster-assets.py
+      - name: Verify all 62 delivered files against the package
+        run: sha256sum --check docs/EDITORIAL-PACKAGE.sha256
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - name: Commit only reproduced assets to the upload branch
+        run: |
+          git add -- public/veil src/landing/icon-paths.ts
+          git diff --cached --check
+          test -z "$(git diff --cached --name-only | grep -vE '^(public/veil/|src/landing/icon-paths\.ts$)' || true)"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git diff --cached --quiet || git commit -m 'build: materialize verified VEIL production assets'
+          git push origin HEAD:refs/heads/design/veil-editorial-upload
+          git rev-parse HEAD > /tmp/veil-upload-commit.txt
+          sha256sum --check docs/EDITORIAL-PACKAGE.sha256 > /tmp/veil-upload-checksums.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: veil-editorial-upload-verification
+          path: |
+            public/veil
+            dist
+            /tmp/veil-upload-commit.txt
+            /tmp/veil-upload-checksums.txt
+          retention-days: 7
