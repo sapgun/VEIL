@@ -1,15 +1,63 @@
-// VEIL policy-only scaffold. Not deployed or connected to the web demo.
-// A witness is self-asserted until an issuer credential is verified in-circuit.
+// VEIL persona architecture scaffold. NOT compiled, deployed or connected to UI.
+// This is not byte-compatible with the local HMAC/Ed25519 demo protocol.
 pragma language_version >= 0.20;
 
 import CompactStandardLibrary;
 
-export ledger authorizations: Counter;
-witness privateAge(): Uint<8>;
+export ledger issuerAuthority: Bytes<32>;
+export ledger roots: MerkleTree<8, Bytes<32>>;
+export ledger revokedPersonas: Set<Bytes<32>>;
+export ledger usedRequests: Set<Bytes<32>>;
+export ledger authorizations: Set<Bytes<32>>;
+export ledger selectedLinks: Set<Bytes<32>>;
 
-export circuit authorize(): [] {
-  const age = privateAge();
-  assert(age <= 150, "Age outside demo domain");
-  assert(age >= 18, "Age policy not satisfied");
-  authorizations.increment(1);
+witness rootSecret(): Bytes<32>;
+witness issuerSecret(): Bytes<32>;
+witness membershipPath(): MerkleTreePath<8, Bytes<32>>;
+
+constructor(issuer: Bytes<32>) { issuerAuthority = disclose(issuer); }
+
+circuit rootCommitment(secret: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "VEIL/root/v1"), secret]);
+}
+circuit personaId(secret: Bytes<32>, context: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([pad(32, "VEIL/persona/v1"), secret, context]);
+}
+circuit checkedRoot(): Bytes<32> {
+  const secret = rootSecret();
+  const path = membershipPath();
+  assert(path.leaf == rootCommitment(secret), "Wrong root membership leaf");
+  assert(roots.checkRoot(disclose(merkleTreePathRoot<8, Bytes<32>>(path))), "Root not enrolled");
+  return secret;
+}
+
+export circuit enroll(commitment: Bytes<32>): [] {
+  const authority = persistentHash<Vector<2, Bytes<32>>>([pad(32, "VEIL/issuer/v1"), issuerSecret()]);
+  assert(authority == issuerAuthority, "Issuer required");
+  roots.insert(disclose(commitment));
+}
+
+// requestDigest must bind the verifier's complete action/amount/expiry/domain.
+// This scaffold binds a digest, but does NOT enforce those policy fields yet.
+export circuit authorize(context: Bytes<32>, requestDigest: Bytes<32>, nonce: Bytes<32>): [] {
+  const p = disclose(personaId(checkedRoot(), context));
+  assert(!revokedPersonas.member(p), "Persona revoked");
+  const request = disclose(persistentHash<Vector<3, Bytes<32>>>([pad(32, "VEIL/request/v1"), p, nonce]));
+  assert(!usedRequests.member(request), "Request replay");
+  usedRequests.insert(request);
+  authorizations.insert(disclose(persistentHash<Vector<3, Bytes<32>>>([p, requestDigest, nonce])));
+}
+
+export circuit linkSelected(contextA: Bytes<32>, contextB: Bytes<32>, challenge: Bytes<32>): [] {
+  assert(contextA != contextB, "Select distinct contexts");
+  const secret = checkedRoot();
+  const a = disclose(personaId(secret, contextA));
+  const b = disclose(personaId(secret, contextB));
+  assert(!revokedPersonas.member(a), "First persona revoked");
+  assert(!revokedPersonas.member(b), "Second persona revoked");
+  selectedLinks.insert(disclose(persistentHash<Vector<4, Bytes<32>>>([pad(32, "VEIL/link/v1"), a, b, challenge])));
+}
+
+export circuit revoke(context: Bytes<32>): [] {
+  revokedPersonas.insert(disclose(personaId(checkedRoot(), context)));
 }

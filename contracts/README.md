@@ -1,12 +1,22 @@
-# Midnight Compact policy scaffold
+# VEIL Compact integration scaffold
 
-`veil.compact` expresses the intended private predicate using a witness, two assertions, and a public success counter. The raw age is not a ledger field or public circuit parameter. This source is not called by the frontend.
+The source now models the actual VEIL direction: issuer-gated root enrollment, hidden membership, domain-separated personas, authorization commitments, selected same-root links and persona revocation.
 
-**Status: source scaffold only; compilation, proof generation and deployment have not been verified.** The language pragma follows the documented supported syntax. Compiler 0.30.0 is an explicit compatibility target, not a claim that it is the newest release. It uses Compact language 0.22 according to the [toolchain documentation](https://docs.midnight.network/compact/compilation-and-tooling/dev-tool-usage).
+**Status: uncompiled source scaffold.** It is not called by the web demo and has no deployed address or generated proof artifacts. There is no claim that these circuits currently compile or provide a reviewed privacy protocol.
 
-## Compile separately
+## Source design
 
-Use Linux, macOS, or WSL with the official [Compact developer tools](https://docs.midnight.network/compact/compilation-and-tooling/dev-tool-usage) installed. Native Windows `compact.exe` is a disk compression utility and must not be used. The npm wrapper stops on native Windows for this reason.
+- `enroll`: checks knowledge of the issuer secret before adding a root commitment to a Merkle tree.
+- `checkedRoot`: checks the private path leaf against the hidden root secret and the derived Merkle digest against the public tree.
+- `authorize`: derives a context persona, rejects revocation/reused requests, and records a commitment binding persona, request digest and nonce.
+- `linkSelected`: uses one private root to derive two chosen context personas, checks both are active, and records a challenge-bound pair commitment. It does not include a third persona.
+- `revoke`: requires root knowledge/membership to revoke the derived context persona.
+
+The sketch uses a Merkle path rather than publicly looking up a root identifier during each authorization. That choice avoids introducing an obvious shared root key in the authorization lookup, but does not itself prove end-to-end unlinkability. Enrollment, transaction metadata, the membership set size and other transcript data need review.
+
+## Compile
+
+The compatibility target remains **Compact toolchain 0.30.0**. It is not a claim of the newest release. Use the official [Compact tools](https://docs.midnight.network/compact/compilation-and-tooling/dev-tool-usage) on a supported Linux/macOS environment (or a properly configured WSL development distro).
 
 ```sh
 compact update 0.30.0
@@ -15,20 +25,18 @@ npm run contract:check
 npm run contract:build
 ```
 
-`contract:check` passes `--skip-zk` for a compiler-only pass. `contract:build` runs full key generation. Generated output goes to `contracts/managed/veil` and is ignored. Toolchain installation and proving parameters can require substantial downloads. Web `npm run build` does not compile this contract.
+`contract:check` skips proof-key generation. `contract:build` performs the full compile. Both use the version-pinned wrapper and write ignored generated output to `contracts/managed/veil`. Native Windows is rejected to avoid invoking Windows' unrelated `compact.exe` compression utility.
 
-## Meaning and limitations
+The current machine had no Midnight compiler or ordinary Linux development distro available; only a Docker-internal WSL distro was listed. No operating-system installation or manipulation of that internal distro was performed.
 
-- The circuit accepts a self-asserted witness age in 18–150 and increments the public `authorizations` counter. Failed constraints must reject the transition.
-- A valid witness is **not evidence of a real person's age**. A malicious caller can supply any qualifying value. Credential issuer verification is intentionally absent.
-- The counter is not an authorization token. It has no binding to an agent, action, user, nonce, or expiry. The circuit does not implement delegation or replay prevention.
-- `witnesses.ts` supplies a structural adapter example. After compilation, check it against the generated `Witnesses<PrivateState>` type rather than casting around type errors.
+## Mandatory integration gaps
 
-## Integration acceptance checklist
+1. Compile against the selected toolchain, repair any syntax/type/disclosure incompatibilities and test generated circuit execution. The consulted online reference may describe newer language releases.
+2. Implement issuer enrollment and membership-path construction using generated types. The generic witness adapter must be checked against the generated `Witnesses` type, not cast to hide errors.
+3. Enforce mandate fields **inside the circuit**. The current `requestDigest` only binds a request: it does not constrain amount, target, agent, action or expiry by itself.
+4. Define network/contract domain separation, authenticated agent possession, trusted clock semantics, root revocation and issuer revocation. Current source only sketches persona revocation.
+5. Define verifier consumption and link disclosure semantics. Owner consent is handled by the current UI/Core; a future proving API must authenticate the owner and bind the exact pair and intended verifier.
+6. Wire compatible Midnight private-state, proof, wallet and public-data providers. Local HMAC/Ed25519 values are **not byte-compatible** with Compact's hash construction; do not reuse their IDs as if they were generated circuit outputs.
+7. Test wrong root/path/issuer/context, replay, revocation, mismatched pair and transcript disclosure; then verify actual proofs and network finality.
 
-1. Compile and test the generated circuit with ages 0, 17, 18, 150, 151; confirm only valid values advance ledger state. Check that witness data is absent from the public transcript.
-2. Authenticate an issuer-backed credential inside the circuit; bind it to its holder. Proving a self-asserted number is insufficient.
-3. Bind the proof to an explicit agent, action, chain/contract domain, nonce and expiry. Persist consumption in a trusted verifier/on-chain ledger; define revocation.
-4. Wire matching Midnight SDK/provider versions, a trusted local proof service, wallet signing, and public ledger reads to the generated contract artifacts.
-5. Test rejected proofs, replay, wrong scope, expiry, provider failure and transaction finality on a supported Midnight network. Display verified transaction IDs only after confirmation.
-6. Enable a real-proof mode only after these checks pass. Keep simulation visibly separate.
+References consulted: [Compact reference](https://docs.midnight.network/compact/reference/compact-reference), [ledger data types](https://docs.midnight.network/compact/reference/ledger-adt), [standard library](https://docs.midnight.network/compact/standard-library/exports), and [official compiler platforms](https://github.com/LFDT-Minokawa/compact).

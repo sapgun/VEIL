@@ -1,16 +1,18 @@
 {
   "name": "veil-midnight-mvp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "VEIL: privacy-preserving delegated authorization concept demo and Midnight Compact scaffold",
+  "description": "VEIL: contextual economic personas, consented linking and revocable authority",
   "engines": {
     "node": ">=22.14.0"
   },
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
+    "dev": "npm run demo",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
+    "start": "node server/http.mjs",
+    "demo": "npm run build && npm start",
     "test": "vitest run",
     "contract:check": "node scripts/compile-contract.mjs --skip-zk",
     "contract:build": "node scripts/compile-contract.mjs"

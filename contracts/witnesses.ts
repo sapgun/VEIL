@@ -1,9 +1,37 @@
-/** Structural adapter scaffold. Bind to the generated Witnesses<PrivateState>
- * type after compilation; this file is not used by the browser simulation. */
-export type PrivateState = { age: bigint };
-export const witnesses = {
-  privateAge: ({ privateState }: { privateState: PrivateState }): [PrivateState, bigint] => {
-    if (privateState.age < 0n || privateState.age > 150n) throw new Error('Invalid demo age');
-    return [privateState, privateState.age];
-  },
+/** Structural example only. Replace the generic path with the compiler-generated
+ * Merkle path type and check against generated Witnesses<PrivateState<Path>>. */
+export type PrivateState<Path> = {
+  rootSecret: Uint8Array;
+  issuerSecret?: Uint8Array;
+  membershipPath: Path;
 };
+export function createWitnesses<Path>() {
+  return {
+    rootSecret: ({
+      privateState,
+    }: {
+      privateState: PrivateState<Path>;
+    }): [PrivateState<Path>, Uint8Array] => {
+      if (privateState.rootSecret.length !== 32)
+        throw new Error("Expected 32-byte root secret");
+      return [privateState, privateState.rootSecret];
+    },
+    issuerSecret: ({
+      privateState,
+    }: {
+      privateState: PrivateState<Path>;
+    }): [PrivateState<Path>, Uint8Array] => {
+      if (privateState.issuerSecret?.length !== 32)
+        throw new Error("Issuer role required");
+      return [privateState, privateState.issuerSecret];
+    },
+    membershipPath: ({
+      privateState,
+    }: {
+      privateState: PrivateState<Path>;
+    }): [PrivateState<Path>, Path] => [
+      privateState,
+      privateState.membershipPath,
+    ],
+  };
+}

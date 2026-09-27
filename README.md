@@ -1,95 +1,100 @@
 # VEIL
 
-**Permission without exposure.** A minimal exploration of privacy-preserving delegated authorization for the Midnight Korea Hackathon.
+**Unlink by Default. Link by Consent.**
 
-An agent should learn whether it may perform a specific action, without receiving the underlying credential.
+One verified principal. Multiple context-specific economic personas. Reveal a relationship only when the owner chooses.
 
-> **Delivery status:** working React/TypeScript **local simulation**, plus a Midnight Compact **policy scaffold**. The frontend does not generate or verify a ZK proof, connect a wallet, submit a transaction, or call the Compact contract. The contract has not yet been compiled or deployed. This is an experimental prototype, not production authorization.
+VEIL explores a Private Economic Identity Layer for agentic commerce. The hackathon walkthrough covers **DAILY / POS, API and DEFI**, scoped authorization, selective same-principal disclosure and revocation.
 
-## Run in two minutes
+> **v0.2 delivery status:** a working local Desktop Core and mobile-first web/PWA shell. Persona derivation, digital signatures, signature verification, scope checks, consent, expiry, replay prevention and revocation are implemented. The credential issuer is mocked and commerce actions are simulated. **This is NOT a Midnight ZK application yet.** The revised Compact contract is an uncompiled integration scaffold, not the engine behind the UI.
 
-Requires Node.js 22.14+ and npm. No API keys, wallet, Docker, or environment variables are required for the web demo.
+## Run
+
+Node.js **22.14+**, npm, and a modern browser with Web Crypto Ed25519 support are required. No API keys, wallet, account or environment file is needed.
 
 ```sh
 npm ci
-npm run dev
+npm run demo
 ```
 
-Open the local URL printed by Vite (normally http://127.0.0.1:5173).
+Open **http://127.0.0.1:43127/**. The command builds the frontend, then starts the loopback-only Desktop Core serving both the app and API. `npm run dev` is an alias for the same complete demo (no hot reload). After code changes, stop the process and run it again.
 
 ```sh
-npm test
-npm run build
-npm run preview
+npm test           # Core + HTTP integration tests
+npm run build     # TypeScript check + frontend bundle
+npm start         # serve an already built app with Core
 ```
 
-The static production output is `dist/`. A hosting provider can build with `npm ci && npm run build` and serve that directory. No live deployment URL is claimed by this repository.
+`npm run preview` serves only static UI assets and cannot authorize or link personas. Use `npm start` for the complete experience. `dist/` alone is no longer a complete deployable app. State is ephemeral; restarting the Core clears the demo identity and changes the signing key.
 
-## 60-second judge demo
+## Three-minute demo
 
-1. Start with the fictional age **27**. Press **Evaluate privately**.
-2. The input clears and the agent panel reads **AUTHORIZED**. Open the receipt: it contains the decision and action scope, never the raw age.
-3. Press **Delegate action**. The app displays **EXECUTED**, explicitly marked as a simulation. The button locks after one use.
-4. Enter **17** and evaluate. The result becomes **NOT AUTHORIZED** and delegation stays disabled.
-5. Try **18** for the passing boundary. Wait 60 seconds to show expiry, or edit the input to immediately invalidate authorization.
-6. Show `contracts/veil.compact`: a private witness, fixed age constraints, and a public success counter. Explain that real proving and issuer authentication are the next integration milestone.
+1. **Create mock verified root.** A cryptographically random root secret stays in Core memory. Three different HMAC-derived persona IDs appear in the owner dashboard.
+2. **DAILY:** request authorization for 12 demo units, then execute a fictional cafe purchase. Open the verifier view and inspect the receipt. It contains the DAILY identifier and approved action, not the root or other persona IDs.
+3. **API:** select API, request 2 units and execute the API simulation. **DEFI:** select DEFI, request 25 units and execute the sandbox swap. No external commerce or funds are involved.
+4. **Link by consent:** select DAILY + DEFI, explicitly check consent, then create the signed link attestation. Only that pair is included; API's identifier is omitted. The browser verifies the signature and the Core checks current validity.
+5. **Revoke DAILY**, select it and request authorization again. The request is denied. API remains usable. Root revocation instead invalidates every persona.
+6. Demonstrate a negative case: **Test replay rejection** after execution, request above a mandate limit, or wait 60 seconds before execution. The server rejects these even if UI checks are bypassed.
 
-## Architecture and disclosure
+The owner dashboard intentionally knows all three personas. Counterparty screens are separately scoped response views in the same trusted local app, not independently isolated external services.
+
+## What is real, mocked, and pending
+
+| Capability               | Status                                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| Context personas         | HMAC-SHA-256 with a random 32-byte root and context/target domain separation                                             |
+| Private state placement  | Root is held in Node Core memory, never returned in API responses                                                        |
+| Authorization receipts   | Real Ed25519 signatures; browser verifies exact payload bytes against the connected Core public key                      |
+| Scope / expiry / replay  | Server checks fixed action and target, per-action amount, challenge and 60-second expiry; atomic one-use consumption     |
+| Selective linking        | Explicit owner consent; real signed **Core attestation**, not a same-root ZK proof                                       |
+| Revocation               | Core-enforced persona or root revocation, including outstanding receipts and current link validity                       |
+| Credential issuer        | Mock registration; no KYC, external issuer or real credential authenticity                                               |
+| POS / API / DeFi actions | Local simulations with signed execution receipts; no settlement                                                          |
+| PWA                      | Responsive layout, manifest, icon and app-shell service worker; physical-device installation not validated               |
+| Mobile/Desktop pairing   | Not implemented; Core binds only to loopback                                                                             |
+| Midnight                 | Persona/membership/link/revocation Compact source scaffold; compilation, proving, wallet and network integration pending |
+
+## Privacy boundary
 
 ```text
-CURRENT WEB DEMO (entirely in the browser)
-Fictional private input -> local policy evaluation -> unsigned receipt
-                                                    -> one simulated action
+Owner PWA / browser
+     | explicit authorization or pair-link consent
+     v
+Trusted local Desktop Core
+  private root + mock issuer + persona/mandate state
+  HMAC persona derivation + Ed25519 attestation signing
+     |
+     +--> DAILY receipt --> POS simulation
+     +--> API receipt   --> API simulation
+     +--> DEFI receipt  --> DeFi simulation
+     +--> selected-pair statement only after consent
 
-COMPACT SCAFFOLD (separate from the UI)
-privateAge() witness -> constraints: 18 <= age <= 150
-                    -> increment public authorizations counter
-
-NEXT INTEGRATION
-Issuer-authenticated credential -> Compact proof -> verified scoped permission
-                               -> independently verified agent execution
+Future: replace trusted Core assertions with verified Midnight ZK proofs
 ```
 
-| Component | Implemented | Boundary |
-| --- | --- | --- |
-| React + TypeScript UI | Yes | Responsive, masked input, allow/deny/reset states |
-| Session model | Yes | One use, fixed action, 60-second expiry; local UX guard only |
-| Public-shaped receipt | Yes | Unsigned object; not a ZK proof or bearer token |
-| Compact source + witness adapter | Scaffold | Compiler target 0.30.0; compilation unverified |
-| Credential authenticity | No | User-entered age can be fabricated |
-| Wallet / proof provider / Midnight deployment | No | No on-chain transaction or contract address |
-| Real delegated agent execution | No | Only reserves fictional demo access in UI memory |
+Different persona IDs and absence of a shared root ID reduce explicit correlation in the receipt schema. **They do not establish cryptographic unlinkability or anonymity.** The Core knows the entire relationship graph; timing, amounts, network metadata and a small anonymity set can still correlate activities. The single-owner local demo is not a privacy deployment.
 
-No raw input is transmitted, logged, stored in browser storage, or included in receipts by this code. React clears the input after evaluation, but this does not guarantee secure memory erasure. Someone controlling the browser can inspect memory or bypass all local checks. The decision still discloses that the age policy passed; it is not zero information disclosure. The Compact counter would also make successful activity public.
+Signatures prove that the connected Core attested to the payload; they do not prove the Core is honest. The public key is trusted through the local connection, not an external issuer registry. Capabilities are bearer-style demo receipts: the `subject` names a generated agent session, but possession of an agent private key is not checked.
 
-## Repository map
+## Repository
 
 ```text
-src/App.tsx                   Interactive walkthrough
-src/styles.css                Responsive interface
-src/authorization.ts          Explicitly simulated session model
-src/authorization.test.ts     Boundary, expiry, scope and replay tests
-contracts/veil.compact        Minimal private witness policy scaffold
-contracts/witnesses.ts        Structural TypeScript witness adapter
-contracts/README.md           Compiler and integration instructions
-scripts/compile-contract.mjs  Guarded Compact invocation
-docs/SECURITY.md              Trust model and production gaps
-docs/VALIDATION.md            Verification evidence and limits
+src/App.tsx              Owner dashboard and scoped counterparty view
+src/protocol.ts          Typed API client and browser signature verification
+server/core.mjs          Private state, persona derivation, signed receipt lifecycle
+server/http.mjs          Loopback API + static app server
+server/*.test.mjs        Core and HTTP boundary tests
+public/                 PWA shell assets (never caches API responses)
+contracts/veil.compact   Midnight integration scaffold
+contracts/witnesses.ts  Structural witness adapter
+docs/SECURITY.md         Explicit trust model and deployment restrictions
+docs/VALIDATION.md       Verified evidence and remaining limits
 ```
 
-## Midnight path
+See [Compact integration](contracts/README.md) before attempting a real proof. The local HMAC protocol and Compact hash construction are intentionally separate; generated Midnight artifacts are not loaded by the app.
 
-See [contract instructions](contracts/README.md). The UI deliberately does not import speculative Midnight SDK packages or display invented transaction hashes. Replace the local model only after compiled types, private-state, proof, wallet and public-data providers are integrated and independently tested. Do not accept an `authorized: true` JSON object as evidence of a proof.
+## Submission and next milestone
 
-Official references checked on 2026-09-27:
+The product flow now follows contextual personas and owner-selected linking. Completing the original Midnight acceptance bar still requires compiled/tested circuits, real membership and same-root proofs, private mandate enforcement, a wallet/proof bridge and network validation. Native mobile apps, real payments and real DeFi remain outside this iteration.
 
-- [Compact language reference](https://docs.midnight.network/compact/reference/compact-reference)
-- [Witnesses and contract structure](https://docs.midnight.network/compact/reference/writing)
-- [Compact toolchain usage and version selection](https://docs.midnight.network/compact/compilation-and-tooling/dev-tool-usage)
-- [Midnight examples](https://docs.midnight.network/examples)
-
-## Security and submission
-
-Use fictional credentials only. Never commit wallet seeds, keys, `.env` files, or private-state dumps. See [security notes](docs/SECURITY.md). No secrets are required by this prototype.
-
-This repository supplies code and a demo script; hackathon eligibility, any required real-network integration, a hosted demo/video, and submission-form completion must be checked separately. Do not describe this version as a deployed ZK application.
+Do not submit this as a completed ZK implementation. Hosting, a recorded demo and the actual submission form have not been completed. Do not expose the local owner API publicly without a redesigned authentication, transport and storage boundary.

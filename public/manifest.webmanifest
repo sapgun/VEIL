@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "VEIL — Private Economic Personas",
+  "short_name": "VEIL",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#101715",
+  "theme_color": "#101715",
+  "description": "Local-first economic persona prototype. Requires the VEIL Desktop Core.",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
