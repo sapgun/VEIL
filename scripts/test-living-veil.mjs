@@ -45,10 +45,16 @@ try {
   pass('separation, fading and reverse scroll remain deterministic');
   await page.locator('#experience').scrollIntoViewIfNeeded();await page.waitForTimeout(1000);
   assert.equal(await page.locator('.vl-atmosphere').evaluate(e=>Math.round(e.getBoundingClientRect().top)),Math.round(top.rect.y));
-  await page.getByRole('tab',{name:/API/}).click();await page.getByRole('checkbox').check();
+  await page.getByRole('tab',{name:/API/}).click();
+  // The visible switch/label is the pointer target; the transparent input is the keyboard target.
+  await page.locator('.vl-consent').click();
+  assert.equal(await page.getByRole('checkbox').isChecked(),true);
   assert.match(await page.getByRole('status').innerText(),/shared|included|disclosed/i);
+  await page.getByRole('checkbox').focus();await page.keyboard.press('Space');
+  assert.equal(await page.getByRole('checkbox').isChecked(),false);
+  await page.keyboard.press('Space');assert.equal(await page.getByRole('checkbox').isChecked(),true);
   await page.getByRole('tab',{name:/DeFi/}).click();assert.equal(await page.getByRole('checkbox').isChecked(),false);
-  await page.screenshot({path:`${dir}/desktop-experience.png`});pass('global veil stays below usable tabs and consent inputs');
+  await page.screenshot({path:`${dir}/desktop-experience.png`});pass('global veil stays below pointer and keyboard consent controls');
   await page.getByText('What does revocation actually do?',{exact:true}).click();
   assert.ok(await page.getByText(/Revocation stops future use/).isVisible());pass('FAQ remains operable');
   await page.getByRole('button',{name:'Ambient motion',exact:true}).click();
