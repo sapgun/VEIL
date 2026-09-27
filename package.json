@@ -1,0 +1,29 @@
+{
+  "name": "veil-midnight-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "VEIL: privacy-preserving delegated authorization concept demo and Midnight Compact scaffold",
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "vitest run",
+    "contract:check": "node scripts/compile-contract.mjs --skip-zk",
+    "contract:build": "node scripts/compile-contract.mjs"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "~5.9.3",
+    "vite": "~6.4.3",
+    "vitest": "^4.1.11"
+  }
+}

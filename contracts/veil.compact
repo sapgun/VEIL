@@ -1,0 +1,15 @@
+// VEIL policy-only scaffold. Not deployed or connected to the web demo.
+// A witness is self-asserted until an issuer credential is verified in-circuit.
+pragma language_version >= 0.20;
+
+import CompactStandardLibrary;
+
+export ledger authorizations: Counter;
+witness privateAge(): Uint<8>;
+
+export circuit authorize(): [] {
+  const age = privateAge();
+  assert(age <= 150, "Age outside demo domain");
+  assert(age >= 18, "Age policy not satisfied");
+  authorizations.increment(1);
+}
