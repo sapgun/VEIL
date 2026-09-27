@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 640" fill="none"><title>VEIL archival document texture</title><defs><linearGradient id="p" x1="0" y1="0" x2="480" y2="640" gradientUnits="userSpaceOnUse"><stop stop-color="#d2c8b7"/><stop offset=".55" stop-color="#bfb4a2"/><stop offset="1" stop-color="#a99e8c"/></linearGradient><pattern id="hatch" width="9" height="9" patternUnits="userSpaceOnUse"><path d="M0 9L9 0" stroke="#443b2e" stroke-opacity=".06" stroke-width=".5"/></pattern></defs>
+<path d="M10 7L124 9L238 5L368 10L470 7L474 159L470 311L475 489L470 631L327 627L196 632L80 628L8 631L5 468L10 318L7 156Z" fill="url(#p)"/>
+<path d="M23 26H454V612H23Z" stroke="#51493d" stroke-opacity=".4"/>
+<path d="M10 313L470 316M240 8L244 630" stroke="#fff" stroke-opacity=".1"/>
+<rect x="11" y="11" width="457" height="613" fill="url(#hatch)"/>
+<path d="M47 72H288M47 85H180M47 117H430" stroke="#51493d" stroke-opacity=".4"/>
+<path d="M46 153H278V166H46ZM46 180H351V193H46ZM46 207H225V220H46Z" fill="#2c2925"/>
+<g stroke="#665b4b" stroke-opacity=".28"><path d="M46 259H430"/><path d="M46 278H430"/><path d="M46 297H430"/><path d="M46 316H430"/><path d="M46 335H430"/><path d="M46 354H430"/><path d="M46 373H430"/><path d="M46 392H430"/><path d="M46 411H430"/><path d="M46 430H430"/><path d="M46 449H430"/><path d="M46 468H430"/><path d="M46 487H430"/><path d="M46 506H430"/><path d="M46 525H430"/><path d="M46 544H430"/><path d="M46 563H430"/></g><circle cx="379" cy="73" r="24" stroke="#685c4a" stroke-opacity=".4"/><circle cx="379" cy="73" r="19" stroke="#685c4a" stroke-opacity=".3"/></svg>
