@@ -37,7 +37,6 @@ void main(){
   }
   bg*=1.-coverage*.73;
   bg+=vec3(edge*.045);
-  // Seeded spatial grain; no per-frame randomness or flicker.
   bg+=vec3((hash(floor(vUv*vec2(1100,720)))-.5)*.007)*light;
   float margin=smoothstep(0.,.14,vUv.x)*smoothstep(0.,.14,1.-vUv.x)*smoothstep(0.,.12,vUv.y)*smoothstep(0.,.10,1.-vUv.y);
   color=vec4(mix(vec3(.06667),bg,margin),1.);
@@ -50,7 +49,7 @@ out vec2 vUv;
 out vec3 vNormal;
 uniform float uAspect,uBend,uVelocity,uProgress;
 vec3 sheet(vec2 uv){
-  float freeEdge=pow(1.-uv.y,1.7);
+  float freeEdge=pow(max(0.,1.-uv.y),1.7);
   float fold=.042*sin(uv.x*30.+sin(uv.y*4.)*.8)+.027*sin(uv.x*57.-uv.y*2.4)+.062*sin(uv.x*12.+uv.y*3.);
   float flutter=freeEdge*(uBend*.22*sin(uv.x*8.+uv.y*5.-uProgress*3.)+uVelocity*.009*sin(uv.x*39.+uv.y*15.));
   float x=(uv.x*2.-1.)*uAspect*.96+freeEdge*uBend*.19;

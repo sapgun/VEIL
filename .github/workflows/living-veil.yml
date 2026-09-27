@@ -22,10 +22,11 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm test
-      - name: Install temporary browser QA tools (no lockfile changes)
+      - name: Install isolated browser QA tools (no application dependency changes)
         run: |
-          npm install --no-save --package-lock=false playwright@1.55.0
-          npx playwright install --with-deps chromium
+          npm install --prefix /tmp/veil-browser-tools playwright@1.55.0 --ignore-scripts
+          ln -s /tmp/veil-browser-tools/node_modules/playwright node_modules/playwright
+          /tmp/veil-browser-tools/node_modules/.bin/playwright install --with-deps chromium
       - name: Test the built page with real WebGL2
         run: node scripts/test-living-veil.mjs
       - uses: actions/upload-artifact@v4
