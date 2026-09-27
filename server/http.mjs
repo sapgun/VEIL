@@ -71,10 +71,7 @@ export function createApp(core = createCore()) {
           case "/api/owner/link":
             return send(200, core.link(body.contexts, body.consent));
           case "/api/public/execute":
-            return send(
-              200,
-              core.execute(body.envelope, body.context, body.nonce),
-            );
+            return send(200, core.execute(body.envelope, body.context, body.nonce));
           case "/api/public/verify-link":
             return send(200, core.verifyLink(body.envelope));
           default:
@@ -84,10 +81,9 @@ export function createApp(core = createCore()) {
       if (req.method !== "GET")
         return send(405, { error: "Method not allowed" });
       const decoded = decodeURIComponent(path);
-      const relative =
-        decoded === "/" || decoded === "/verifier"
-          ? "index.html"
-          : decoded.slice(1);
+      const relative = ["/", "/app", "/app/", "/verifier"].includes(decoded)
+        ? "index.html"
+        : decoded.slice(1);
       const filename = resolve(dist, relative);
       if (!filename.startsWith(resolve(dist) + sep))
         return send(403, { error: "Forbidden path" });
@@ -105,23 +101,17 @@ export function createApp(core = createCore()) {
       res.end(content);
     } catch (error) {
       send(error.code === "ENOENT" ? 404 : 400, {
-        error:
-          error.code === "ENOENT"
-            ? "Build the frontend first with npm run build"
-            : error.message,
+        error: error.code === "ENOENT"
+          ? "Build the frontend first with npm run build"
+          : error.message,
       });
     }
   });
 }
 
-if (
-  process.argv[1] &&
-  resolve(process.argv[1]) === fileURLToPath(import.meta.url)
-) {
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const port = Number(process.env.PORT ?? 43127);
   createApp().listen(port, "127.0.0.1", () =>
-    console.log(
-      `VEIL Desktop Core: http://127.0.0.1:${port} (local signed mode; not Midnight ZK)`,
-    ),
+    console.log(`VEIL Desktop Core: http://127.0.0.1:${port} (local signed mode; not Midnight ZK)`),
   );
 }
