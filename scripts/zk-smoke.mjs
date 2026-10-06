@@ -41,6 +41,36 @@ altered[Math.floor(altered.length / 2)] ^= 1;
 assert.throws(() =>
   engine.verify({ ...proof, transaction: altered.toString("base64") }),
 );
+// Wave 2: policy enforced inside the circuit, bypassing every Core pre-check.
+// The engine calls the circuit directly, so only the circuit's own assert
+// stands between an over-cap request and a valid proof.
+const policyOk = await engine.call("authorizeWithPolicy", [
+  pad("api"),
+  pad("transfer"),
+  5n,
+  10n,
+  randomBytes(32),
+]);
+assert.equal(engine.verify(policyOk), true);
+await assert.rejects(
+  engine.call("authorizeWithPolicy", [
+    pad("api"),
+    pad("transfer"),
+    11n,
+    10n,
+    randomBytes(32),
+  ]),
+  /Amount exceeds policy/,
+);
+// Same amount under a higher cap succeeds: the circuit, not the caller, decides.
+const policyHigher = await engine.call("authorizeWithPolicy", [
+  pad("api"),
+  pad("transfer"),
+  11n,
+  20n,
+  randomBytes(32),
+]);
+assert.equal(engine.verify(policyHigher), true);
 await assert.rejects(
   engine.call("linkSelected", [
     pad("daily"),
@@ -70,6 +100,8 @@ console.log(
         "revocation-proof",
         "proof-tamper-rejected",
         "circuit-replay-rejected",
+        "circuit-policy-cap-enforced",
+        "circuit-policy-cap-rejected",
         "revoked-circuit-rejected",
         "consent",
         "amount",

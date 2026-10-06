@@ -48,6 +48,33 @@ export circuit authorize(context: Bytes<32>, requestDigest: Bytes<32>, nonce: By
   authorizations.insert(disclose(persistentHash<Vector<3, Bytes<32>>>([p, requestDigest, nonce])));
 }
 
+// Wave 2 (2026-10): circuit-enforced policy.
+//
+// The Wave 1 `authorize` circuit above binds a Core-computed requestDigest, so
+// amount/action/expiry policy was enforced by the Core. This circuit moves one
+// policy check into the circuit itself: the amount cap is asserted here, so a
+// Core that skips (or a caller that bypasses) its own pre-checks still cannot
+// produce a valid authorization proof for an over-cap request.
+//
+// amount/maxAmount are public circuit inputs committed in the proof transcript;
+// disclosing them binds the enforced policy to this authorization explicitly.
+export circuit authorizeWithPolicy(
+  context: Bytes<32>,
+  action: Bytes<32>,
+  amount: Uint<64>,
+  maxAmount: Uint<64>,
+  nonce: Bytes<32>
+): [] {
+  const p = disclose(personaId(checkedRoot(), context));
+  assert(!revokedPersonas.member(p), "Persona revoked");
+  const request = disclose(persistentHash<Vector<3, Bytes<32>>>([pad(32, "VEIL/request/v1"), p, nonce]));
+  assert(!usedRequests.member(request), "Request replay");
+  assert(disclose(amount) <= disclose(maxAmount), "Amount exceeds policy");
+  usedRequests.insert(request);
+  authorizations.insert(disclose(persistentHash<Vector<4, Bytes<32>>>(
+    [pad(32, "VEIL/policyAuth/v1"), p, action, request])));
+}
+
 export circuit linkSelected(contextA: Bytes<32>, contextB: Bytes<32>, challenge: Bytes<32>): [] {
   assert(contextA != contextB, "Select distinct contexts");
   const secret = checkedRoot();

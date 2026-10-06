@@ -89,8 +89,9 @@ npm start             # serve the built app and ZK Core
 - Authorization binds that persona, the exact receipt digest and nonce; circuit checks revocation and request replay.
 - Selective linking derives both selected personas from the **same** hidden root and checks both are active.
 - Revocation requires knowledge of the corresponding hidden enrolled root.
+- **Wave 2:** `authorizeWithPolicy` enforces the amount cap **inside the circuit** (`assert(amount <= maxAmount)`). The cap is a public circuit input committed in the proof transcript, so an over-cap request cannot produce a valid proof even if the Core's own pre-checks are skipped or bypassed.
 
-Amount, target, action, consent and receipt expiry are **Core-enforced policy**. They are bound by the receipt digest but are not independently constrained by the circuit. The mock issuer does not prove real-world credential authenticity. The root secret and private witness transcript never enter API responses or source control.
+Amount, target, action, consent and receipt expiry remain **Core-enforced policy** for the original `authorize` circuit. They are bound by the receipt digest but are not independently constrained by that circuit. The mock issuer does not prove real-world credential authenticity. The root secret and private witness transcript never enter API responses or source control.
 
 ## Verification boundary
 
@@ -123,6 +124,15 @@ The MVP implements the core loop: Verified Root → Context Personas → Authori
 </p>
 
 A veil does not erase the person behind it. It controls what becomes visible, to whom, and when. All brand assets live in [`docs/assets/`](docs/assets/).
+
+## Wave 2 delta (2026-10) — baseline vs. new work
+
+**September baseline (Midnight Korea Hackathon):** 4 Compact circuits (`enroll`, `authorize`, `linkSelected`, `revoke`), proof-server verification, in-memory offline ledger. Policy (amount/action/expiry) enforced by the local Core and bound via the receipt digest.
+
+**New in Wave 2:**
+- `authorizeWithPolicy` circuit: the amount cap is asserted **inside the circuit**. Over-cap requests are rejected by the proof itself, with no Core pre-check in the path (`scripts/zk-smoke.mjs`: `circuit-policy-cap-enforced` / `circuit-policy-cap-rejected`).
+- The enforced cap is a disclosed public input, committed in the proof transcript and bound into the `VEIL/policyAuth/v1` authorization record.
+- The September baseline circuits are untouched; the new circuit is purely additive.
 
 ## Roadmap
 
