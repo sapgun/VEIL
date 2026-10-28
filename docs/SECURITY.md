@@ -21,3 +21,7 @@ Selective links require explicit consent and exactly two active personas. The ci
 This is not multi-user authentication: trusted local programs and same-origin code can obtain the token. Counterparty screens minimize response fields but share the same trusted origin. Do not tunnel or publicly expose the owner API. Phone pairing requires authenticated encrypted transport, protected keys and its own threat model.
 
 Only fictional data is supported. No wallet credentials or API keys are required. Never commit secrets, private witness transcripts, owner tokens or generated private state. Generated contract artifacts and environment/key files are ignored. Real issuer authentication, agent possession proofs, private mandate constraints, network/contract domain separation, durable revocation and an independent verifier deployment remain unfinished.
+
+## Optional Solana Devnet adapter
+
+The separate Solana adapter uses owner-issued local mandates, checks current Core persona/root state, and signs public native SOL transfers using a dedicated Devnet keypair. Its payment policy is not bound into the existing Midnight proof transcript. It is disabled by default in the desktop server. Existing Midnight UI actions remain simulated. See [Solana Devnet boundaries](SOLANA-DEVNET.md) for signer custody, fees, replay persistence, ambiguous submissions and revocation limits.

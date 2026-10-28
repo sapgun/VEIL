@@ -16,7 +16,11 @@
     "test": "vitest run",
     "contract:check": "node scripts/compile-contract.mjs --skip-zk",
     "contract:build": "node scripts/compile-contract.mjs",
-    "test:zk": "node scripts/zk-smoke.mjs"
+    "test:zk": "node scripts/zk-smoke.mjs",
+    "test:solana": "vitest run server/solana/payments.test.mjs server/http.test.mjs",
+    "solana:keygen": "node scripts/solana-keygen.mjs",
+    "solana:check": "node --env-file-if-exists=.env scripts/solana-devnet.mjs",
+    "solana:pay": "node --env-file-if-exists=.env scripts/solana-devnet.mjs --execute"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-js": "2.5.0",
@@ -27,6 +31,8 @@
     "@midnight-ntwrk/midnight-js-network-id": "4.0.4",
     "@midnight-ntwrk/midnight-js-node-zk-config-provider": "4.0.4",
     "@midnight-ntwrk/wallet-sdk-address-format": "3.1.0",
+    "@solana-program/system": "0.16.0",
+    "@solana/kit": "8.5.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

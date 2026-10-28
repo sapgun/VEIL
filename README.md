@@ -22,11 +22,9 @@ VEIL is building a private economic identity and authorization layer: one human 
 
 ## Current status
 
-> **Branch availability:** The Solana adapter is implemented in [PR #1](https://github.com/sapgun/VEIL/pull/1) on `feat/solana-devnet-payments` and has not been merged into `main`. The Midnight MVP is available on `main`; Solana functionality, commands and validation described below refer to that feature branch.
-
 **Implemented today: Midnight local ZK authorization and an initial owner-authorized Solana Devnet SOL payment adapter.** The adapter has automated offline coverage using real signed transactions and injected RPC responses. Live Helius settlement, proof-bound payment authority and autonomous agent delegation are not yet verified.
 
-See [Solana Devnet setup and API](https://github.com/sapgun/VEIL/blob/feat/solana-devnet-payments/docs/SOLANA-DEVNET.md) for the CLI, Helius configuration, tests and trust boundaries.
+See [Solana Devnet setup and API](docs/SOLANA-DEVNET.md) for the CLI, Helius configuration, tests and trust boundaries.
 
 | Area | Current implementation | Next work |
 | --- | --- | --- |
@@ -84,14 +82,7 @@ RPC plan access should not be assumed to include Rings access or production avai
 
 ## Solana quickstart
 
-The CLI path uses local owner policy and does not require the Midnight compiler or proof server. First switch to the implementation branch:
-
-```sh
-git fetch origin
-git switch --track origin/feat/solana-devnet-payments
-```
-
-If that branch already exists locally, use `git switch feat/solana-devnet-payments` instead.
+The CLI path uses local owner policy and does not require the Midnight compiler or proof server.
 
 ```sh
 npm ci
@@ -121,7 +112,7 @@ This sends a public Devnet SOL transfer after policy checks and simulation. The 
 | Public Devnet simulation | Real signed transfer from an unfunded temporary signer returned the expected `AccountNotFound`; no broadcast |
 | Helius connectivity / funded settlement | Not yet verified |
 
-The CLI is separate from the existing app UI. Payment UI, WebSocket subscriptions, SPL token payments, persistent replay protection and proof-bound payment authority remain next work. See the [full setup and API guide](https://github.com/sapgun/VEIL/blob/feat/solana-devnet-payments/docs/SOLANA-DEVNET.md).
+The CLI is separate from the existing app UI. Payment UI, WebSocket subscriptions, SPL token payments, persistent replay protection and proof-bound payment authority remain next work. See the [full setup and API guide](docs/SOLANA-DEVNET.md).
 
 ## Understand the current Midnight MVP in 90 seconds
 
@@ -255,7 +246,7 @@ A limited mainnet pilot would follow successful Devnet validation and review of 
 
 The trusted Desktop Core knows all persona relationships. The demo has one enrolled root, so its anonymity set is one; it demonstrates the circuit mechanism, **not production anonymity**. Timing and other metadata can still correlate actions. A selected-link disclosure cannot be undone after someone observes it.
 
-The owner API and verifier screens share one local origin. Do not expose them publicly. Encrypted phone pairing, independent external verifiers, authenticated agent keys, private mandate circuits, durable revocation, a funded wallet and public-network deployment remain future work. Native mobile apps and real settlement remain outside the original Midnight UI demo. The separate Solana adapter adds an explicit Devnet-only transfer path with local policy; see [its boundaries](https://github.com/sapgun/VEIL/blob/feat/solana-devnet-payments/docs/SOLANA-DEVNET.md).
+The owner API and verifier screens share one local origin. Do not expose them publicly. Encrypted phone pairing, independent external verifiers, authenticated agent keys, private mandate circuits, durable revocation, a funded wallet and public-network deployment remain future work. Native mobile apps and real settlement remain outside the original Midnight UI demo. The separate Solana adapter adds an explicit Devnet-only transfer path with local policy; see [its boundaries](docs/SOLANA-DEVNET.md).
 
 ## Source map
 
