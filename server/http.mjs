@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { createCore } from "./core.mjs";
 
 const dist = fileURLToPath(new URL("../dist/", import.meta.url));
-export function createApp(core = createCore(), { solana } = {}) {
+export function createApp(core = createCore(), { solana, delegation } = {}) {
   const sessionToken = randomBytes(32).toString("hex");
   return createServer(async (req, res) => {
     res.setHeader("Cache-Control", "no-store");
@@ -50,6 +50,8 @@ export function createApp(core = createCore(), { solana } = {}) {
           return send(200, core.snapshot());
         if (req.method === "GET" && path === "/api/owner/solana/info")
           return send(200, solana?.info() ?? { enabled: false, network: "solana:devnet" });
+        if (req.method === "GET" && path === "/api/agent/info")
+          return delegation ? send(200, delegation.info()) : send(503, { error: "Agent adapter is disabled" });
         if (req.method !== "POST")
           return send(405, { error: "Method not allowed" });
         if (req.headers["content-type"]?.split(";")[0] !== "application/json")
@@ -61,6 +63,21 @@ export function createApp(core = createCore(), { solana } = {}) {
             return send(413, { error: "Request too large" });
         }
         const body = JSON.parse(buffer || "{}");
+        if (path.startsWith("/api/agent/") || path.startsWith("/api/owner/agents/")) {
+          if (!delegation) return send(503, { error: "Agent adapter is disabled" });
+          switch (path) {
+            case "/api/owner/agents/register": return send(200, delegation.register(body));
+            case "/api/owner/agents/offer": return send(200, delegation.offer(body));
+            case "/api/owner/agents/revoke": return send(200, delegation.revokeAgent(body.agentId));
+            case "/api/owner/agents/revoke-mandate": return send(200, delegation.revokeMandate(body.mandateId));
+            case "/api/agent/connect": return send(200, delegation.connect(body));
+            case "/api/agent/inbox": return send(200, delegation.inbox(body));
+            case "/api/agent/accept": return send(200, delegation.accept(body));
+            case "/api/agent/pay": return send(200, await delegation.pay(body));
+            case "/api/agent/status": return send(200, await delegation.status(body));
+            default: return send(404, { error: "Route not found" });
+          }
+        }
         if (path.startsWith("/api/owner/solana/")) {
           if (!solana) return send(503, { error: "Solana adapter is disabled" });
           switch (path) {
@@ -143,14 +160,24 @@ if (
   const { createZkCore } = await import("./zk-core.mjs");
   const core = createZkCore();
   let solana;
+  let delegation;
+  if (process.env.VEIL_AGENTS_ENABLED === "1" && process.env.VEIL_SOLANA_ENABLED !== "1")
+    throw new Error("Agent payments require the explicitly enabled Devnet Solana adapter");
   if (process.env.VEIL_SOLANA_ENABLED === "1") {
     const { solanaConfig, loadDevnetSigner, createSolanaTransport } = await import("./solana/transport.mjs");
     const { createPaymentService } = await import("./solana/payments.mjs");
     const config = solanaConfig();
     const signer = await loadDevnetSigner(config.keypairPath);
-    solana = createPaymentService({ core, transport: createSolanaTransport({ ...config, signer }) });
+    const transport = createSolanaTransport({ ...config, signer });
+    solana = createPaymentService({ core, transport });
+    if (process.env.VEIL_AGENTS_ENABLED === "1") {
+      const { createAgentStore } = await import("./agents/store.mjs");
+      const { createDelegationService } = await import("./agents/delegation.mjs");
+      const store = createAgentStore(process.env.VEIL_AGENT_DB_PATH ?? ".private/agents.sqlite");
+      delegation = createDelegationService({ core, transport, store });
+    }
   }
-  createApp(core, { solana }).listen(port, "127.0.0.1", () =>
+  createApp(core, { solana, delegation }).listen(port, "127.0.0.1", () =>
     console.log(
       `VEIL Desktop Core: http://127.0.0.1:${port} (Midnight offline ledger; Solana Devnet adapter ${solana ? "enabled" : "disabled"})`,
     ),
