@@ -193,5 +193,10 @@ export function createDelegationService({ core, transport, store, now = Date.now
       const row = requests.get(id); check(row, "Unknown agent payment");
       return publish(id, await payments.refresh(row.intentId));
     },
+    async ownerStatus({ agentId, requestId }) {
+      const id = `${agentId}:${requestId}`;
+      const row = requests.get(id); check(row, "Unknown agent payment");
+      return publish(id, await payments.refresh(row.intentId));
+    },
   };
 }

@@ -20,7 +20,9 @@
     "test:solana": "vitest run server/solana/payments.test.mjs server/http.test.mjs",
     "solana:keygen": "node scripts/solana-keygen.mjs",
     "solana:check": "node --env-file-if-exists=.env scripts/solana-devnet.mjs",
-    "solana:pay": "node --env-file-if-exists=.env scripts/solana-devnet.mjs --execute"
+    "solana:pay": "node --env-file-if-exists=.env scripts/solana-devnet.mjs --execute",
+    "test:agents": "vitest run server/agents/delegation.test.mjs",
+    "agent:demo": "node scripts/agent-demo.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-js": "2.5.0",

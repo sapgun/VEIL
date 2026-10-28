@@ -70,6 +70,7 @@ export function createApp(core = createCore(), { solana, delegation } = {}) {
             case "/api/owner/agents/offer": return send(200, delegation.offer(body));
             case "/api/owner/agents/revoke": return send(200, delegation.revokeAgent(body.agentId));
             case "/api/owner/agents/revoke-mandate": return send(200, delegation.revokeMandate(body.mandateId));
+            case "/api/owner/agents/status": return send(200, await delegation.ownerStatus(body));
             case "/api/agent/connect": return send(200, delegation.connect(body));
             case "/api/agent/inbox": return send(200, delegation.inbox(body));
             case "/api/agent/accept": return send(200, delegation.accept(body));

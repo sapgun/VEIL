@@ -48,7 +48,7 @@ export function createPaymentService({ core, transport, now = Date.now, storage,
       check(destination !== transport.payer, "Recipient must differ from payer");
       amount(maxLamports);
       check(Number.isSafeInteger(ttlMs) && ttlMs > 0 && ttlMs <= MAX_TTL, "TTL must be 1–60000 milliseconds");
-      check(mandates.size < 200, "Restart the local demo before creating more mandates");
+      check(mandates.size < 200, "Payment mandate storage limit reached");
       const mandate = { id: randomUUID(), context, persona: p.id, payer: transport.payer,
         recipient: destination, maxLamports, expiresAt: Math.min(now() + ttlMs, p.mandateExpiresAt), revoked: false };
       mandates.set(mandate.id, mandate);
@@ -65,7 +65,7 @@ export function createPaymentService({ core, transport, now = Date.now, storage,
       amount(lamports);
       const m = mandates.get(mandateId);
       check(m, "Unknown payment mandate");
-      check(intents.size < 500, "Restart the local demo before creating more intents");
+      check(intents.size < 500, "Payment intent storage limit reached");
       const intent = { id: randomUUID(), mandateId, network: "solana:devnet", asset: "SOL",
         payer: transport.payer, recipient: m.recipient, lamports, expiresAt: m.expiresAt,
         status: "authorized", signature: null, createdAt: now() };
