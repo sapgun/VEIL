@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { createCore } from "./core.mjs";
 
 const dist = fileURLToPath(new URL("../dist/", import.meta.url));
-export function createApp(core = createCore()) {
+export function createApp(core = createCore(), { solana } = {}) {
   const sessionToken = randomBytes(32).toString("hex");
   return createServer(async (req, res) => {
     res.setHeader("Cache-Control", "no-store");
@@ -48,6 +48,8 @@ export function createApp(core = createCore()) {
           return send(401, { error: "Owner session required" });
         if (req.method === "GET" && path === "/api/owner/state")
           return send(200, core.snapshot());
+        if (req.method === "GET" && path === "/api/owner/solana/info")
+          return send(200, solana?.info() ?? { enabled: false, network: "solana:devnet" });
         if (req.method !== "POST")
           return send(405, { error: "Method not allowed" });
         if (req.headers["content-type"]?.split(";")[0] !== "application/json")
@@ -59,6 +61,23 @@ export function createApp(core = createCore()) {
             return send(413, { error: "Request too large" });
         }
         const body = JSON.parse(buffer || "{}");
+        if (path.startsWith("/api/owner/solana/")) {
+          if (!solana) return send(503, { error: "Solana adapter is disabled" });
+          switch (path) {
+            case "/api/owner/solana/mandates":
+              return send(200, solana.grant(body));
+            case "/api/owner/solana/revoke":
+              return send(200, solana.revoke(body.mandateId));
+            case "/api/owner/solana/intents":
+              return send(200, solana.createIntent(body));
+            case "/api/owner/solana/execute":
+              return send(200, await solana.execute(body.intentId));
+            case "/api/owner/solana/status":
+              return send(200, await solana.refresh(body.intentId));
+            default:
+              return send(404, { error: "Route not found" });
+          }
+        }
         switch (path) {
           case "/api/owner/setup":
             return send(200, await core.setup());
@@ -122,9 +141,18 @@ if (
 ) {
   const port = Number(process.env.PORT ?? 43127);
   const { createZkCore } = await import("./zk-core.mjs");
-  createApp(createZkCore()).listen(port, "127.0.0.1", () =>
+  const core = createZkCore();
+  let solana;
+  if (process.env.VEIL_SOLANA_ENABLED === "1") {
+    const { solanaConfig, loadDevnetSigner, createSolanaTransport } = await import("./solana/transport.mjs");
+    const { createPaymentService } = await import("./solana/payments.mjs");
+    const config = solanaConfig();
+    const signer = await loadDevnetSigner(config.keypairPath);
+    solana = createPaymentService({ core, transport: createSolanaTransport({ ...config, signer }) });
+  }
+  createApp(core, { solana }).listen(port, "127.0.0.1", () =>
     console.log(
-      `VEIL Desktop Core: http://127.0.0.1:${port} (Midnight ZK; offline ledger, simulated actions)`,
+      `VEIL Desktop Core: http://127.0.0.1:${port} (Midnight offline ledger; Solana Devnet adapter ${solana ? "enabled" : "disabled"})`,
     ),
   );
 }

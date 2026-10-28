@@ -10,7 +10,7 @@
 
 ---
 
-VEIL is building a private economic identity and authorization layer: one human can use context-specific personas, prove authority, selectively disclose relationships, and revoke future permissions. The current implementation is a Midnight-based local ZK MVP. The next development target is a Solana Devnet payment adapter using Helius infrastructure.
+VEIL is building a private economic identity and authorization layer: one human can use context-specific personas, prove authority, selectively disclose relationships, and revoke future permissions. The current implementation combines a Midnight-based local ZK MVP with an initial Solana Devnet payment adapter. The adapter uses Solana Kit and can connect to Helius RPC; its local payment policy is not yet bound to a Midnight proof.
 
 **One verified human. Many economic personas. Linked only when you choose.**
 
@@ -22,7 +22,9 @@ VEIL is building a private economic identity and authorization layer: one human 
 
 ## Current status
 
-**Implemented today: Midnight local ZK authorization. Planned next: Solana Devnet settlement with Helius.** Solana support is not implemented in this repository yet.
+**Implemented today: Midnight local ZK authorization and an initial owner-authorized Solana Devnet SOL payment adapter.** The adapter has automated offline coverage using real signed transactions and injected RPC responses. Live Helius settlement, proof-bound payment authority and autonomous agent delegation are not yet verified.
+
+See [Solana Devnet setup and API](docs/SOLANA-DEVNET.md) for the CLI, Helius configuration, tests and trust boundaries.
 
 | Area | Current implementation | Next work |
 | --- | --- | --- |
@@ -30,8 +32,8 @@ VEIL is building a private economic identity and authorization layer: one human 
 | ZK authorization | Midnight Compact circuits, real proof generation and verification on an in-memory offline ledger | Connect verified authority to payment execution |
 | Policy | Original authorization uses Core-enforced policy; the additive `authorizeWithPolicy` circuit enforces a public per-request amount cap | Cumulative budget accounting and payment-specific policy binding |
 | Consent and revocation | Selective persona linking and revocation in the local demo | Durable state and enforcement at the settlement boundary |
-| Payments | Simulated purchases, API billing and swaps | Solana Devnet payment adapter |
-| Helius | No integration implemented | RPC simulation, submission, confirmation tracking and account subscriptions |
+| Payments | Existing UI actions remain simulated; separate Devnet SOL adapter and explicit CLI payment path | Funded Devnet validation and payment UI |
+| Helius | Server-side Devnet endpoint configuration; Kit RPC simulation, submission and status polling | Live Helius validation and account subscriptions |
 | Confidential Solana payments | No integration implemented | Evaluate Solana Rings separately after the basic payment flow |
 
 The [live landing](https://veil-sigma-lilac.vercel.app/) introduces the project; it does not host the local ZK Core or execute real payments.
@@ -44,15 +46,15 @@ The working Midnight core and the planned Solana adapter serve different respons
 | --- | --- | --- |
 | VEIL Core | Manage personas, consent, authorization receipts and execution policy | Implemented locally; production hardening remains |
 | Midnight | Generate and verify proofs of persona authority, selected links and revocation; additional circuit checks a per-request amount cap | Implemented on the offline demo ledger |
-| Solana adapter | Bind an authorized payment intent to a specific transaction and submit it for settlement | Planned |
-| Helius | Provide Solana RPC access and transaction/account observations for the adapter | Planned |
+| Solana adapter | Build, sign, simulate and submit a scoped Devnet SOL transfer; reject stale authority and duplicate execution | Initial local-policy adapter; offline tested |
+| Helius | Provide Devnet RPC access and transaction status for the adapter | Configured through a server-side key; live validation pending |
 | Solana Rings | Potential confidentiality for settlement | Research; independent of basic RPC integration |
 
-A valid Midnight proof does **not** automatically authorize or constrain a Solana transaction. The adapter still needs a defined trust boundary, authenticated signing authority, and binding between the authorization and the exact network, recipient, asset, amount and request. This repository does not implement a cross-chain proof verifier or trustless bridge.
+A valid Midnight proof does **not** automatically authorize or constrain a Solana transaction. The adapter still needs a defined trust boundary, authenticated signing authority, and binding between the authorization and the exact network, recipient, asset, amount and request. The initial adapter checks current Core state and enforces owner-issued payment policy locally. It does not bind the payment intent into the existing Midnight proof transcript or implement a cross-chain proof verifier or trustless bridge.
 
-## Next milestone: Solana Devnet payment MVP
+## Solana Devnet payment MVP: implementation and next validation
 
-The first Solana milestone is one end-to-end payment flow:
+The adapter and owner-only API implement the following flow under trusted local policy. The CLI can exercise it with a separate local signed Core; live settlement evidence is still pending:
 
 1. A user grants a scoped payment authorization for an agent, including recipient, asset, per-request amount cap and expiry.
 2. The execution component validates authority and policy, including current revocation, and binds the request to the exact transaction.
@@ -60,15 +62,15 @@ The first Solana milestone is one end-to-end payment flow:
 4. It tracks confirmation and exposes the result with the authorization receipt.
 5. Negative cases reject over-cap, expired, revoked and replayed requests before signing or submission.
 
-**Completion evidence:** a reproducible Devnet transaction, its matching authorization receipt, and rejection cases for invalid requests. This is a development target, not a description of shipped functionality. A per-request cap is not a cumulative spending budget. Local revocation is not on-chain enforcement, and cannot undo an already signed or settled transaction.
+**Next validation evidence:** a reproducible funded Devnet transaction, its matching local intent record, and rejection cases for invalid requests. Automated tests cover the implementation with injected RPC responses; they do not demonstrate live settlement or a Midnight-attested payment. A per-request cap is not a cumulative spending budget. Local revocation is not on-chain enforcement, and cannot undo an already signed or settled transaction.
 
 ### Why Helius
 
-Helius is the intended infrastructure provider for the Solana adapter:
+The adapter selects Helius Devnet when a server-side `HELIUS_API_KEY` is set, and the public Solana Devnet RPC otherwise:
 
 - **RPC reads and simulation:** obtain required account state and simulate the proposed payment.
 - **Transaction submission and confirmation:** submit signed transactions, track status, and reconcile failures without treating an RPC acknowledgment as settlement.
-- **Account and signature subscriptions:** follow relevant state changes and transaction outcomes using the subscription options available on the selected plan.
+- **Current confirmation strategy:** poll signature status; WebSocket account/signature subscriptions are planned, not implemented.
 
 The initial scope does not depend on NFT indexing or high-volume trading infrastructure. Actual endpoint, Devnet and subscription availability must be checked when integrating.
 
@@ -198,7 +200,7 @@ A veil does not erase the person behind it. It controls what becomes visible, to
 | --- | --- | --- |
 | Midnight MVP | Local proof core, personas, authorization, selective links and revocation | Implemented; offline demo only |
 | Policy circuit extension | Public per-request amount cap enforced inside `authorizeWithPolicy` | Implemented; no cumulative budget |
-| Solana Devnet adapter | Scoped payment intent, execution checks, Helius RPC and result tracking | Planned next |
+| Solana Devnet adapter | Owner-scoped native SOL intent, execution checks, configurable Helius RPC and status tracking | Initial implementation; offline tested, live validation pending |
 | Confidential settlement evaluation | Assess Solana Rings and its fit with VEIL's privacy and delegation model | Research |
 | Developer prototype | `veil-sdk`, x401/x402 adapters, wallet abstraction and secure Core transport | Planned |
 | Production integrations | Durable revocation, real credential issuers, independent verifiers and reviewed payment execution | Future work |
@@ -210,7 +212,7 @@ A limited mainnet pilot would follow successful Devnet validation and review of 
 
 The trusted Desktop Core knows all persona relationships. The demo has one enrolled root, so its anonymity set is one; it demonstrates the circuit mechanism, **not production anonymity**. Timing and other metadata can still correlate actions. A selected-link disclosure cannot be undone after someone observes it.
 
-The owner API and verifier screens share one local origin. Do not expose them publicly. Encrypted phone pairing, independent external verifiers, authenticated agent keys, private mandate circuits, durable revocation, a funded wallet and public-network deployment remain future work. Native mobile apps and real settlement are out of scope.
+The owner API and verifier screens share one local origin. Do not expose them publicly. Encrypted phone pairing, independent external verifiers, authenticated agent keys, private mandate circuits, durable revocation, a funded wallet and public-network deployment remain future work. Native mobile apps and real settlement remain outside the original Midnight UI demo. The separate Solana adapter adds an explicit Devnet-only transfer path with local policy; see [its boundaries](docs/SOLANA-DEVNET.md).
 
 ## Source map
 
@@ -218,7 +220,9 @@ The owner API and verifier screens share one local origin. Do not expose them pu
 - `server/midnight.mjs`: proof generation, actual ledger verification and state transitions.
 - `server/zk-core.mjs`: serialized ZK-backed authorization / link / revocation flow.
 - `server/core.mjs`: receipt signing and execution policy; also tested independently.
-- `server/http.mjs`: loopback API and frontend server.
+- `server/http.mjs`: loopback API, owner-only Solana routes and frontend server.
+- `server/solana/`: local payment policies, real Kit transaction construction and configurable Devnet RPC transport.
+- `scripts/solana-devnet.mjs`: explicit Devnet connectivity check and owner-authorized CLI payment demo.
 - `src/`: React/TypeScript owner and verifier UI; PWA assets in `public/`.
 - `scripts/zk-smoke.mjs`: positive proofs and negative circuit/verifier tests.
 - `docs/assets/`: brand and concept imagery used above.
