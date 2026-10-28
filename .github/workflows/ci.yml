@@ -22,6 +22,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm test
+      - run: npm run agent:demo
       - name: Compile real Compact circuits
         run: |
           curl -fsSL https://github.com/midnightntwrk/compact/releases/download/compactc-v0.30.0/compactc_v0.30.0_x86_64-unknown-linux-musl.zip -o /tmp/compact.zip

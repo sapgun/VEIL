@@ -20,8 +20,14 @@ Selective links require explicit consent and exactly two active personas. The ci
 
 This is not multi-user authentication: trusted local programs and same-origin code can obtain the token. Counterparty screens minimize response fields but share the same trusted origin. Do not tunnel or publicly expose the owner API. Phone pairing requires authenticated encrypted transport, protected keys and its own threat model.
 
-Only fictional data is supported. No wallet credentials or API keys are required. Never commit secrets, private witness transcripts, owner tokens or generated private state. Generated contract artifacts and environment/key files are ignored. Real issuer authentication, agent possession proofs, private mandate constraints, network/contract domain separation, durable revocation and an independent verifier deployment remain unfinished.
+Only fictional data is supported. No wallet credentials or API keys are required. Never commit secrets, private witness transcripts, owner tokens or generated private state. Generated contract artifacts and environment/key files are ignored. For the original Midnight UI path, real issuer authentication, agent possession proofs, private mandate constraints, network/contract domain separation, durable revocation and an independent verifier deployment remain unfinished. The separate external-agent adapter adds Ed25519 key-possession and signed request checks; it does not add those facts to the Midnight proof transcript.
 
 ## Optional Solana Devnet adapter
 
 The separate Solana adapter uses owner-issued local mandates, checks current Core persona/root state, and signs public native SOL transfers using a dedicated Devnet keypair. Its payment policy is not bound into the existing Midnight proof transcript. It is disabled by default in the desktop server. Existing Midnight UI actions remain simulated. See [Solana Devnet boundaries](SOLANA-DEVNET.md) for signer custody, fees, replay persistence, ambiguous submissions and revocation limits.
+
+## External-agent delegation
+
+The opt-in external-agent path registers an owner-approved public key, verifies an expiring possession challenge, delivers immutable mandate offers and requires the agent to sign acceptance. Signed payment requests use a transactional SQLite cumulative budget and replay records before entering the existing Devnet executor. Agent and mandate revocations are checked around asynchronous preparation/simulation. The signature is persisted before broadcast and uncertain outcomes remain reserved.
+
+The payer signing key remains trusted locally. This is not on-chain policy or Midnight-attested agent delegation. A reset/restart still loses the original Core persona authority, while agent budgets and replay metadata remain stored. Interrupted preparation is held for investigation, not automatically retried. See [protocol boundaries and persistence rules](AGENT-DELEGATION.md).

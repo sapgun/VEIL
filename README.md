@@ -10,7 +10,7 @@
 
 ---
 
-VEIL is building a private economic identity and authorization layer: one human can use context-specific personas, prove authority, selectively disclose relationships, and revoke future permissions. The current implementation combines a Midnight-based local ZK MVP with an initial Solana Devnet payment adapter. The adapter uses Solana Kit and can connect to Helius RPC; its local payment policy is not yet bound to a Midnight proof.
+VEIL is building a private economic identity and authorization layer: one human can use context-specific personas, prove authority, selectively disclose relationships, and revoke future permissions. The current implementation combines a Midnight-based local ZK MVP with an initial Solana Devnet payment adapter. The adapter uses Solana Kit and can connect to Helius RPC. An external-agent prototype now adds key registration, signed mandate acceptance and signed payment requests with durable budget/idempotency records. Payment policy is still enforced locally and is not yet bound to a Midnight proof.
 
 **One verified human. Many economic personas. Linked only when you choose.**
 
@@ -22,16 +22,16 @@ VEIL is building a private economic identity and authorization layer: one human 
 
 ## Current status
 
-**Implemented today: Midnight local ZK authorization and an initial owner-authorized Solana Devnet SOL payment adapter.** The adapter has automated offline coverage using real signed transactions and injected RPC responses. Live Helius settlement, proof-bound payment authority and autonomous agent delegation are not yet verified.
+**Implemented today: Midnight local ZK authorization and an initial owner-authorized Solana Devnet SOL payment adapter.** The adapter has automated offline coverage using real signed transactions and injected RPC responses. Live Helius settlement and proof-bound payment authority remain unverified. External-agent key authentication and signed delegation are implemented as a local prototype; no LLM agent runtime is included.
 
 See [Solana Devnet setup and API](docs/SOLANA-DEVNET.md) for the CLI, Helius configuration, tests and trust boundaries.
 
 | Area | Current implementation | Next work |
 | --- | --- | --- |
-| Identity and personas | Mock credential issuer, hidden root, DAILY / API / DEFI personas | Real issuer integration and authenticated agent keys |
+| Identity and personas | Mock credential issuer, hidden root, DAILY / API / DEFI personas; external Ed25519 agent key registration and possession challenge | Real credential issuer integration |
 | ZK authorization | Midnight Compact circuits, real proof generation and verification on an in-memory offline ledger | Connect verified authority to payment execution |
-| Policy | Original authorization uses Core-enforced policy; the additive `authorizeWithPolicy` circuit enforces a public per-request amount cap | Cumulative budget accounting and payment-specific policy binding |
-| Consent and revocation | Selective persona linking and revocation in the local demo | Durable state and enforcement at the settlement boundary |
+| Policy | Midnight per-request policy circuit; separate local agent mandates with per-request cap, cumulative budget, expiry and signed acceptance | Midnight proof binding and on-chain settlement policy |
+| Consent and revocation | Persona linking/revocation; agent and mandate revocation; SQLite agent/payment metadata | Production verifier and key custody design |
 | Payments | Existing UI actions remain simulated; separate Devnet SOL adapter and explicit CLI payment path | Funded Devnet validation and payment UI |
 | Helius | Server-side Devnet endpoint configuration; Kit RPC simulation, submission and status polling | Live Helius validation and account subscriptions |
 | Confidential Solana payments | No integration implemented | Evaluate Solana Rings separately after the basic payment flow |
@@ -56,7 +56,7 @@ A valid Midnight proof does **not** automatically authorize or constrain a Solan
 
 The adapter and owner-only API implement the following flow under trusted local policy. The CLI can exercise it with a separate local signed Core; live settlement evidence is still pending:
 
-1. The owner grants a scoped local payment mandate, including recipient, asset, per-request amount cap and expiry. Independent agent-key delegation is not implemented.
+1. The owner grants a scoped local payment mandate, including recipient, asset, per-request amount cap and expiry. The external-agent protocol additionally requires proof of key possession and signed acceptance before agent payment requests are allowed.
 2. The execution component validates authority and policy, including current revocation, and binds the request to the exact transaction.
 3. The adapter simulates and submits the authorized transaction through Helius RPC.
 4. It tracks confirmation and exposes the result with the authorization receipt.
@@ -103,16 +103,43 @@ This sends a public Devnet SOL transfer after policy checks and simulation. The 
 
 ### Validation snapshot — 2026-10-28
 
+The local agent-extension validation includes a clean install, all tests, the offline agent demo and the production build. The linked CI run below predates the external-agent extension.
+
 | Check | Evidence |
 | --- | --- |
-| Automated tests | 66 tests passed, including real SDK serialization/signatures, decoded payment fields, policy rejection cases and HTTP owner boundaries |
+| Automated tests | 106 tests passed, including 40 external-agent tests plus the Solana/Core/HTTP/landing suite |
 | Production frontend build | `npm run build` passed |
-| GitHub CI for the Solana implementation | [Desktop validation passed](https://github.com/sapgun/VEIL/actions/runs/40703669866), including the existing Midnight proof workflow |
+| GitHub CI for the earlier Solana foundation | [Desktop validation passed](https://github.com/sapgun/VEIL/actions/runs/40703669866), including the existing Midnight proof workflow |
 | Public Devnet connectivity | Full Devnet genesis verified |
 | Public Devnet simulation | Real signed transfer from an unfunded temporary signer returned the expected `AccountNotFound`; no broadcast |
 | Helius connectivity / funded settlement | Not yet verified |
 
-The CLI is separate from the existing app UI. Payment UI, WebSocket subscriptions, SPL token payments, persistent replay protection and proof-bound payment authority remain next work. See the [full setup and API guide](docs/SOLANA-DEVNET.md).
+The CLI is separate from the existing app UI. Payment UI, WebSocket subscriptions, SPL token payments and proof-bound payment authority remain next work. The external-agent path adds SQLite replay/budget persistence; the original owner-only Solana path remains in memory. See the [full setup and API guide](docs/SOLANA-DEVNET.md).
+
+## External agents: receive, accept and use a mandate
+
+VEIL does not create an LLM agent. It gives an existing external agent a scoped way to act for its owner:
+
+1. The owner registers the agent's Ed25519 public key and sends it an expiring invitation.
+2. The agent signs the challenge to prove key possession.
+3. The owner offers a mandate for an exact recipient, Devnet SOL, per-request cap, cumulative budget and deadline.
+4. The agent receives its offers through a signed inbox request and explicitly signs acceptance of the exact policy digest.
+5. Each signed payment request is checked against the accepted mandate and current Core authority, then routed through the existing Solana executor.
+6. The agent retrieves its own receipt with a signed status request. The owner can revoke future authority.
+
+```sh
+npm ci
+npm run agent:demo
+npm run test:agents
+```
+
+The demo runs a temporary loopback server with a real external-agent signing key and real Solana Kit wire transactions against **injected mock RPC responses**. It requires no API key, proof server, wallet funding or live broadcast. Mock confirmation is not a settled Devnet transaction.
+
+Agent records, exact acceptance signatures, replay records, budget reservations and transaction signatures can be persisted to local SQLite. The example uses an in-memory database; the opt-in desktop integration uses `.private/agents.sqlite`. The Solana payer key remains in the trusted local execution process and is never given to the agent.
+
+This is local delegation enforcement. The policy is not bound to a Midnight proof or enforced by a Solana program. Process crashes during preparation leave a conservative held reservation; unknown broadcasts must be reconciled by signature and are never automatically resent. The existing ephemeral Core identity is still reset on desktop restart, invalidating its old persona authority; agent budgets do not reset.
+
+See [external-agent protocol and setup](docs/AGENT-DELEGATION.md) and [the example agent client](client/agent.mjs).
 
 ## Understand the current Midnight MVP in 90 seconds
 
@@ -236,7 +263,8 @@ A veil does not erase the person behind it. It controls what becomes visible, to
 | Policy circuit extension | Public per-request amount cap enforced inside `authorizeWithPolicy` | Implemented; no cumulative budget |
 | Solana Devnet adapter | Owner-scoped native SOL intent, execution checks, configurable Helius RPC and status tracking | Initial implementation; offline tested, live validation pending |
 | Confidential settlement evaluation | Assess Solana Rings and its fit with VEIL's privacy and delegation model | Research |
-| Developer prototype | `veil-sdk`, x401/x402 adapters, wallet abstraction and secure Core transport | Planned |
+| External-agent protocol | Owner connects a key; agent receives and signs acceptance; signed requests use durable budget/idempotency records | Local prototype; offline demo and tests |
+| Developer prototype | Packaged `veil-sdk`, x401/x402 adapters, wallet UI and secure remote Core transport | Planned |
 | Production integrations | Durable revocation, real credential issuers, independent verifiers and reviewed payment execution | Future work |
 | Longer-term clients | Mobile, NFC/QR commerce and agent-to-agent personas | Exploratory |
 
@@ -246,7 +274,7 @@ A limited mainnet pilot would follow successful Devnet validation and review of 
 
 The trusted Desktop Core knows all persona relationships. The demo has one enrolled root, so its anonymity set is one; it demonstrates the circuit mechanism, **not production anonymity**. Timing and other metadata can still correlate actions. A selected-link disclosure cannot be undone after someone observes it.
 
-The owner API and verifier screens share one local origin. Do not expose them publicly. Encrypted phone pairing, independent external verifiers, authenticated agent keys, private mandate circuits, durable revocation, a funded wallet and public-network deployment remain future work. Native mobile apps and real settlement remain outside the original Midnight UI demo. The separate Solana adapter adds an explicit Devnet-only transfer path with local policy; see [its boundaries](docs/SOLANA-DEVNET.md).
+The owner API and verifier screens share one local origin. Do not expose them publicly. Encrypted phone pairing, independent external verifiers, private mandate circuits, durable Midnight ledger state, a funded wallet and public-network deployment remain future work. External-agent keys and delegation records are implemented separately in the local SQLite-backed protocol. Native mobile apps and real settlement remain outside the original Midnight UI demo. The separate Solana adapter adds an explicit Devnet-only transfer path with local policy; see [its boundaries](docs/SOLANA-DEVNET.md).
 
 ## Source map
 
@@ -255,7 +283,10 @@ The owner API and verifier screens share one local origin. Do not expose them pu
 - `server/zk-core.mjs`: serialized ZK-backed authorization / link / revocation flow.
 - `server/core.mjs`: receipt signing and execution policy; also tested independently.
 - `server/http.mjs`: loopback API, owner-only Solana routes and frontend server.
-- `server/solana/`: local payment policies, real Kit transaction construction and configurable Devnet RPC transport.
+- `server/solana/`: payment executor, real Kit transaction construction and configurable Devnet RPC transport.
+- `server/agents/`: signed registration/acceptance/request protocol, transactional SQLite storage and delegation coordinator.
+- `client/agent.mjs`: external-agent client that holds only its own signing key.
+- `scripts/agent-demo.mjs`: offline HTTP delegation lifecycle demo.
 - `scripts/solana-devnet.mjs`: explicit Devnet connectivity check and owner-authorized CLI payment demo.
 - `src/`: React/TypeScript owner and verifier UI; PWA assets in `public/`.
 - `scripts/zk-smoke.mjs`: positive proofs and negative circuit/verifier tests.
