@@ -40,7 +40,7 @@ The [live landing](https://veil-sigma-lilac.vercel.app/) introduces the project;
 
 ## Architecture and responsibilities
 
-The working Midnight core and the planned Solana adapter serve different responsibilities:
+The Midnight core and the initial Solana adapter serve different responsibilities:
 
 | Component | Responsibility | Status |
 | --- | --- | --- |
@@ -56,7 +56,7 @@ A valid Midnight proof does **not** automatically authorize or constrain a Solan
 
 The adapter and owner-only API implement the following flow under trusted local policy. The CLI can exercise it with a separate local signed Core; live settlement evidence is still pending:
 
-1. A user grants a scoped payment authorization for an agent, including recipient, asset, per-request amount cap and expiry.
+1. The owner grants a scoped local payment mandate, including recipient, asset, per-request amount cap and expiry. Independent agent-key delegation is not implemented.
 2. The execution component validates authority and policy, including current revocation, and binds the request to the exact transaction.
 3. The adapter simulates and submits the authorized transaction through Helius RPC.
 4. It tracks confirmation and exposes the result with the authorization receipt.
@@ -79,6 +79,40 @@ The initial scope does not depend on NFT indexing or high-volume trading infrast
 [Helius Privacy / Solana Rings](https://www.helius.dev/docs/privacy) is a potential follow-on integration. At the time of this plan, the official documentation describes a Devnet beta: standard confidential transfers hide the asset and amount while keeping sender and recipient public. This does not establish unlinkability between VEIL personas.
 
 RPC plan access should not be assumed to include Rings access or production availability. Integration feasibility, access requirements, signer/delegation compatibility and metadata exposure need separate validation. The first Devnet payment milestone can use public transfers; it must not be presented as a confidential-payment demo until that integration is implemented and verified.
+
+## Solana quickstart
+
+The CLI path uses local owner policy and does not require the Midnight compiler or proof server.
+
+```sh
+npm ci
+cp .env.example .env
+npm run solana:keygen
+npm run solana:check
+```
+
+Set `HELIUS_API_KEY` in the server-side `.env` to use Helius Devnet. Without it, the adapter selects the public Solana Devnet RPC. `solana:check` only verifies the network and reports the public payer address.
+
+For a deliberate test payment, fund that dedicated address with Devnet SOL, set `VEIL_SOLANA_ENABLED=1` in `.env`, and specify the recipient and amount:
+
+```sh
+npm run solana:pay -- --recipient=YOUR_DEVNET_RECIPIENT --lamports=1000
+```
+
+This sends a public Devnet SOL transfer after policy checks and simulation. The per-request maximum is **0.01 Devnet SOL**, plus network fees; mandates expire within 60 seconds. Inspect the returned status and signature. A `submitted` or `unknown` result is not confirmation; rerunning the CLI creates a new intent and may send an additional payment.
+
+### Validation snapshot — 2026-10-28
+
+| Check | Evidence |
+| --- | --- |
+| Automated tests | 66 tests passed, including real SDK serialization/signatures, decoded payment fields, policy rejection cases and HTTP owner boundaries |
+| Production frontend build | `npm run build` passed |
+| GitHub CI for the Solana implementation | [Desktop validation passed](https://github.com/sapgun/VEIL/actions/runs/40703669866), including the existing Midnight proof workflow |
+| Public Devnet connectivity | Full Devnet genesis verified |
+| Public Devnet simulation | Real signed transfer from an unfunded temporary signer returned the expected `AccountNotFound`; no broadcast |
+| Helius connectivity / funded settlement | Not yet verified |
+
+The CLI is separate from the existing app UI. Payment UI, WebSocket subscriptions, SPL token payments, persistent replay protection and proof-bound payment authority remain next work. See the [full setup and API guide](docs/SOLANA-DEVNET.md).
 
 ## Understand the current Midnight MVP in 90 seconds
 
@@ -125,7 +159,7 @@ Compile in Linux/macOS or a development WSL distribution. Native Windows has an 
 Open **http://127.0.0.1:43127/** and choose **APP**, or open **http://127.0.0.1:43127/app** directly. No wallet, API key, seed or account is required. Keep the proof server local: it receives private witness data. The app rejects remote prover URLs.
 
 ```sh
-npm test              # 29 Core / HTTP / landing tests
+npm test              # Core, HTTP, Solana and landing tests
 npm run test:zk       # real proofs + circuit and verifier rejection tests
 npm run build         # TypeScript + production frontend
 npm start             # serve the built app and ZK Core
